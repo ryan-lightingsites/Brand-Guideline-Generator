@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brand Guide Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #1E3D2F;
+      --green-dk: #0D2018;
+      --bg: #f8f7f4;
+      --white: #ffffff;
+      --border: #e8e4dc;
+      --ink: #1a1a1a;
+      --ink-muted: #6b6b6b;
+      --radius: 8px;
+    }
+
+    html { font-size: 16px; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .app-header {
+      background: var(--green);
+      color: white;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .app-header__title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* Main content */
+    .main {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 40px 24px 120px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--ink-muted);
+      margin-bottom: 40px;
+    }
+
+    /* Section cards */
+    .form-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .section-badge {
+      width: 28px;
+      height: 28px;
+      background: var(--green);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+
+    /* Form fields */
+    .field {
+      margin-bottom: 20px;
+    }
+    .field:last-child { margin-bottom: 0; }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 7px;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus { border-color: var(--green); }
+    .field-input.error { border-color: #c0392b; }
+
+    .field-error {
+      font-size: 12px;
+      color: #c0392b;
+      margin-top: 5px;
+      display: none;
+    }
+    .field-error.visible { display: block; }
+
+    select.field-input {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b6b6b' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    /* Font preview */
+    .font-preview {
+      margin-top: 10px;
+      padding: 14px 16px;
+      background: var(--bg);
+      border-radius: 5px;
+      font-size: 22px;
+      color: var(--ink);
+      min-height: 56px;
+      transition: font-family 0.2s;
+    }
+
+    /* Two-col grid for typography */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* Logo upload zones */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 6px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--green);
+      background: rgba(30,61,47,0.03);
+    }
+    .upload-zone--primary { margin-bottom: 16px; }
+    .upload-zone--secondary {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+    }
+
+    .upload-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+      opacity: 0.4;
+    }
+    .upload-zone--secondary .upload-icon {
+      font-size: 22px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .upload-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .upload-hint {
+      font-size: 12px;
+      color: var(--ink-muted);
+    }
+    .upload-badge {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 2px 6px;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .upload-note {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* File preview inside upload zone */
+    .upload-preview {
+      display: none;
+      align-items: center;
+      gap: 12px;
+    }
+    .upload-preview.visible { display: flex; }
+    .upload-preview img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      border-radius: 4px;
+      background: var(--bg);
+    }
+    .upload-preview__info { flex: 1; text-align: left; }
+    .upload-preview__name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      word-break: break-all;
+    }
+    .upload-preview__type {
+      font-size: 11px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+    .upload-preview .remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink-muted);
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.15s;
+    }
+    .upload-preview .remove-btn:hover { color: #c0392b; }
+    .upload-zone-content {}
+
+    /* Color swatches */
+    .swatches-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .swatch-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .swatch-group:last-child { margin-bottom: 0; }
+
+    .swatch-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 2px;
+    }
+
+    .swatch-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .swatch-picker {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 2px;
+      cursor: pointer;
+      background: none;
+      flex-shrink: 0;
+    }
+
+    .swatch-hex {
+      font-family: 'DM Sans', monospace;
+      font-size: 13px;
+      color: var(--ink-muted);
+      width: 76px;
+      flex-shrink: 0;
+    }
+
+    .swatch-name {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .swatch-name:focus { border-color: var(--green); }
+
+    .swatch-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink-muted);
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .swatch-remove:hover { color: #c0392b; }
+
+    .add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 1.5px solid var(--green);
+      border-radius: 5px;
+      background: none;
+      color: var(--green);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .add-btn:hover { background: var(--green); color: white; }
+
+    /* Image upload grid */
+    .images-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .images-grid .hero-zone {
+      grid-column: 1 / -1;
+    }
+
+    .image-upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 6px;
+      padding: 20px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .image-upload-zone:hover, .image-upload-zone.drag-over {
+      border-color: var(--green);
+      background: rgba(30,61,47,0.03);
+    }
+
+    .image-upload-zone .upload-icon {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+    .image-upload-zone .upload-title {
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+    .image-upload-zone .upload-hint {
+      font-size: 10px;
+    }
+
+    .image-preview-wrap {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    .image-preview-wrap.visible { display: block; }
+    .image-preview-wrap img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .hero-zone .image-preview-wrap img {
+      height: 140px;
+    }
+    .image-preview-wrap .remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0,0,0,0.6);
+      border: none;
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-preview-wrap .img-name {
+      font-size: 11px;
+      color: var(--ink-muted);
+      margin-top: 5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Border radius presets */
+    .radius-presets {
+      display: flex;
+      gap: 12px;
+    }
+
+    .radius-preset {
+      flex: 1;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: var(--white);
+    }
+    .radius-preset.active {
+      border-color: var(--green);
+      background: rgba(30,61,47,0.04);
+    }
+
+    .radius-demo-box {
+      width: 40px;
+      height: 40px;
+      background: var(--green);
+      margin: 0 auto 10px;
+      opacity: 0.7;
+    }
+
+    .radius-preset-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .radius-preset-val {
+      font-size: 11px;
+      color: var(--ink-muted);
+      margin-top: 3px;
+    }
+
+    .radius-custom-wrap {
+      display: none;
+      margin-top: 14px;
+      align-items: center;
+      gap: 8px;
+    }
+    .radius-custom-wrap.visible { display: flex; }
+    .radius-custom-input {
+      width: 80px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      outline: none;
+    }
+    .radius-custom-input:focus { border-color: var(--green); }
+    .radius-unit {
+      font-size: 14px;
+      color: var(--ink-muted);
+    }
+
+    /* Generate button */
+    .generate-wrap {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, var(--bg) 70%, transparent);
+      padding: 20px 24px 28px;
+      z-index: 50;
+    }
+
+    .generate-inner {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .generate-btn {
+      width: 100%;
+      padding: 15px 24px;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .generate-btn:hover { background: #163326; }
+    .generate-btn:active { transform: scale(0.99); }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .generate-btn.shake { animation: shake 0.4s ease; }
+
+    .gen-error {
+      font-size: 13px;
+      color: #c0392b;
+      text-align: center;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+
+    /* Hidden file inputs */
+    input[type="file"] { display: none; }
+
+    /* Helpers */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <span class="app-header__title">Brand Guide Generator</span>
+</header>
+
+<main class="main">
+  <h1 class="page-title">Create your brand guide</h1>
+  <p class="page-subtitle">Fill in your brand details below and generate a polished brand guide PDF.</p>
+
+  <!-- ── 1. Brand Identity ── -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-badge">1</div>
+      <div>
+        <div class="section-title">Brand Identity</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="brandName">Brand Name <span style="color:#c0392b">*</span></label>
+      <input type="text" id="brandName" class="field-input" placeholder="e.g. Acme Studio" />
+      <div class="field-error" id="brandNameError">Please enter a brand name.</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="tagline">Tagline</label>
+      <input type="text" id="tagline" class="field-input" placeholder="e.g. Design. Create. Inspire." />
+    </div>
+  </div>
+
+  <!-- ── 2. Logo ── -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-badge">2</div>
+      <div>
+        <div class="section-title">Logo</div>
+      </div>
+    </div>
+
+    <!-- SVG upload -->
+    <div class="upload-zone upload-zone--primary" id="svgZone" onclick="triggerUpload('svgInput')">
+      <input type="file" id="svgInput" accept=".svg,image/svg+xml" />
+      <div class="upload-zone-content" id="svgContent">
+        <div class="upload-badge">SVG — Recommended</div>
+        <div class="upload-icon">⬆</div>
+        <div class="upload-title">Upload Primary Logo (SVG)</div>
+        <div class="upload-hint">Drag &amp; drop or click to browse · SVG recommended for crisp output at all sizes</div>
+      </div>
+      <div class="upload-preview" id="svgPreview">
+        <img id="svgThumb" src="" alt="SVG preview" />
+        <div class="upload-preview__info">
+          <div class="upload-preview__name" id="svgName"></div>
+          <div class="upload-preview__type">SVG Logo</div>
+        </div>
+        <button class="remove-btn" onclick="removeUpload(event,'svgInput','svgPreview','svgContent','svgThumb','svgName','logoSvg')">&#x2715;</button>
+      </div>
+    </div>
+
+    <!-- PNG upload -->
+    <div class="upload-zone upload-zone--secondary" id="pngZone" onclick="triggerUpload('pngInput')">
+      <input type="file" id="pngInput" accept=".png,image/png" />
+      <div class="upload-zone-content" id="pngContent" style="display:flex;align-items:center;gap:14px;width:100%;">
+        <div class="upload-icon" style="margin-bottom:0;flex-shrink:0;">⬆</div>
+        <div>
+          <div class="upload-badge" style="margin-bottom:4px;">PNG — Fallback</div>
+          <div class="upload-title">Upload PNG Logo</div>
+          <div class="upload-hint">For backgrounds where SVG isn't supported</div>
+        </div>
+      </div>
+      <div class="upload-preview" id="pngPreview" style="width:100%;">
+        <img id="pngThumb" src="" alt="PNG preview" />
+        <div class="upload-preview__info">
+          <div class="upload-preview__name" id="pngName"></div>
+          <div class="upload-preview__type">PNG Logo</div>
+        </div>
+        <button class="remove-btn" onclick="removeUpload(event,'pngInput','pngPreview','pngContent','pngThumb','pngName','logoPng')">&#x2715;</button>
+      </div>
+    </div>
+
+    <!-- Dark logo -->
+    <div class="upload-zone upload-zone--secondary" id="logoDarkZone" onclick="triggerUpload('logoDarkInput')">
+      <input type="file" id="logoDarkInput" accept=".svg,.png,image/svg+xml,image/png" />
+      <div class="upload-zone-content" id="logoDarkContent" style="display:flex;align-items:center;gap:14px;width:100%;">
+        <div class="upload-icon" style="margin-bottom:0;flex-shrink:0;">⬆</div>
+        <div>
+          <div class="upload-badge" style="margin-bottom:4px;">Dark Version</div>
+          <div class="upload-title">Logo on Light Backgrounds</div>
+          <div class="upload-hint">Dark-colored logo for white or light surfaces</div>
+        </div>
+      </div>
+      <div class="upload-preview" id="logoDarkPreview" style="width:100%;">
+        <img id="logoDarkThumb" src="" alt="Dark logo" />
+        <div class="upload-preview__info">
+          <div class="upload-preview__name" id="logoDarkName"></div>
+          <div class="upload-preview__type">Dark Logo</div>
+        </div>
+        <button class="remove-btn" onclick="removeUpload(event,'logoDarkInput','logoDarkPreview','logoDarkContent','logoDarkThumb','logoDarkName','logoDark')">&#x2715;</button>
+      </div>
+    </div>
+
+    <!-- Light logo -->
+    <div class="upload-zone upload-zone--secondary" id="logoLightZone" onclick="triggerUpload('logoLightInput')">
+      <input type="file" id="logoLightInput" accept=".svg,.png,image/svg+xml,image/png" />
+      <div class="upload-zone-content" id="logoLightContent" style="display:flex;align-items:center;gap:14px;width:100%;">
+        <div class="upload-icon" style="margin-bottom:0;flex-shrink:0;">⬆</div>
+        <div>
+          <div class="upload-badge" style="margin-bottom:4px;">Light Version</div>
+          <div class="upload-title">Logo on Dark Backgrounds</div>
+          <div class="upload-hint">White or light-colored logo for dark/colored surfaces</div>
+        </div>
+      </div>
+      <div class="upload-preview" id="logoLightPreview" style="width:100%;">
+        <img id="logoLightThumb" src="" alt="Light logo" />
+        <div class="upload-preview__info">
+          <div class="upload-preview__name" id="logoLightName"></div>
+          <div class="upload-preview__type">Light Logo</div>
+        </div>
+        <button class="remove-btn" onclick="removeUpload(event,'logoLightInput','logoLightPreview','logoLightContent','logoLightThumb','logoLightName','logoLight')">&#x2715;</button>
+      </div>
+    </div>
+
+    <!-- Logo icon -->
+    <div class="upload-zone upload-zone--secondary" id="logoIconZone" onclick="triggerUpload('logoIconInput')">
+      <input type="file" id="logoIconInput" accept=".svg,.png,image/svg+xml,image/png" />
+      <div class="upload-zone-content" id="logoIconContent" style="display:flex;align-items:center;gap:14px;width:100%;">
+        <div class="upload-icon" style="margin-bottom:0;flex-shrink:0;">⬆</div>
+        <div>
+          <div class="upload-badge" style="margin-bottom:4px;">Icon / Mark</div>
+          <div class="upload-title">Logo Icon or Brandmark</div>
+          <div class="upload-hint">Standalone icon used in small-size contexts</div>
+        </div>
+      </div>
+      <div class="upload-preview" id="logoIconPreview" style="width:100%;">
+        <img id="logoIconThumb" src="" alt="Logo icon" />
+        <div class="upload-preview__info">
+          <div class="upload-preview__name" id="logoIconName"></div>
+          <div class="upload-preview__type">Logo Icon</div>
+        </div>
+        <button class="remove-btn" onclick="removeUpload(event,'logoIconInput','logoIconPreview','logoIconContent','logoIconThumb','logoIconName','logoIcon')">&#x2715;</button>
+      </div>
+    </div>
+
+    <p class="upload-note">SVG recommended for crisp output at all sizes. PNG is used as a fallback option.</p>
+  </div>
+
+  <!-- ── 3. Typography ── -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-badge">3</div>
+      <div>
+        <div class="section-title">Typography</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="field">
+        <label class="field-label" for="primaryFont">Primary — Headings &amp; Display</label>
+        <select id="primaryFont" class="field-input" onchange="onFontChange('primaryFont','primaryPreview')">
+          <optgroup label="Serif">
+            <option value="Playfair Display" selected>Playfair Display</option>
+            <option value="Lora">Lora</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="EB Garamond">EB Garamond</option>
+            <option value="Cormorant Garamond">Cormorant Garamond</option>
+            <option value="Libre Baskerville">Libre Baskerville</option>
+            <option value="DM Serif Display">DM Serif Display</option>
+            <option value="Spectral">Spectral</option>
+            <option value="Crimson Pro">Crimson Pro</option>
+            <option value="Fraunces">Fraunces</option>
+          </optgroup>
+          <optgroup label="Sans-serif">
+            <option value="Inter">Inter</option>
+            <option value="DM Sans">DM Sans</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Raleway">Raleway</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Nunito">Nunito</option>
+            <option value="Work Sans">Work Sans</option>
+            <option value="Outfit">Outfit</option>
+            <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+            <option value="Manrope">Manrope</option>
+            <option value="Space Grotesk">Space Grotesk</option>
+            <option value="Figtree">Figtree</option>
+            <option value="Urbanist">Urbanist</option>
+            <option value="Syne">Syne</option>
+          </optgroup>
+          <optgroup label="Display">
+            <option value="Oswald">Oswald</option>
+            <option value="Bebas Neue">Bebas Neue</option>
+            <option value="Abril Fatface">Abril Fatface</option>
+            <option value="Anton">Anton</option>
+            <option value="Josefin Sans">Josefin Sans</option>
+          </optgroup>
+        </select>
+        <div class="font-preview" id="primaryPreview">The quick brown fox jumps</div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="secondaryFont">Secondary — Body &amp; UI</label>
+        <select id="secondaryFont" class="field-input" onchange="onFontChange('secondaryFont','secondaryPreview')">
+          <optgroup label="Serif">
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Lora">Lora</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="EB Garamond">EB Garamond</option>
+            <option value="Cormorant Garamond">Cormorant Garamond</option>
+            <option value="Libre Baskerville">Libre Baskerville</option>
+            <option value="DM Serif Display">DM Serif Display</option>
+            <option value="Spectral">Spectral</option>
+            <option value="Crimson Pro">Crimson Pro</option>
+            <option value="Fraunces">Fraunces</option>
+          </optgroup>
+          <optgroup label="Sans-serif">
+            <option value="Inter">Inter</option>
+            <option value="DM Sans" selected>DM Sans</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Raleway">Raleway</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Nunito">Nunito</option>
+            <option value="Work Sans">Work Sans</option>
+            <option value="Outfit">Outfit</option>
+            <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+            <option value="Manrope">Manrope</option>
+            <option value="Space Grotesk">Space Grotesk</option>
+            <option value="Figtree">Figtree</option>
+            <option value="Urbanist">Urbanist</option>
+            <option value="Syne">Syne</option>
+          </optgroup>
+          <optgroup label="Display">
+            <option value="Oswald">Oswald</option>
+            <option value="Bebas Neue">Bebas Neue</option>
+            <option value="Abril Fatface">Abril Fatface</option>
+            <option value="Anton">Anton</option>
+            <option value="Josefin Sans">Josefin Sans</option>
+          </optgroup>
+        </select>
+        <div class="font-preview" id="secondaryPreview">The quick brown fox jumps</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0;border-top:1px solid var(--border);">
+        <span style="font-size:14px;color:var(--ink);">Capitalize headings</span>
+        <input type="checkbox" id="capitalizeHeadings" style="width:16px;height:16px;cursor:pointer;" onchange="data.capitalizeHeadings = this.checked" />
+      </label>
+    </div>
+  </div>
+
+  <!-- ── 4. Color Palette ── -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-badge">4</div>
+      <div>
+        <div class="section-title">Color Palette</div>
+      </div>
+    </div>
+
+    <div id="swatchesList"></div>
+    <button class="add-btn" onclick="addSwatch()">
+      <span>+</span> Add Color
+    </button>
+  </div>
+
+  <!-- ── 5. Brand Images ── -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-badge">5</div>
+      <div>
+        <div class="section-title">Brand Images — 7 slots</div>
+        <div class="section-subtitle">Upload images for the various brand guide sections</div>
+      </div>
+    </div>
+
+    <div class="images-grid">
+      <!-- Hero -->
+      <div class="hero-zone image-upload-zone" id="heroZone" onclick="triggerImageUpload('heroInput')">
+        <input type="file" id="heroInput" accept="image/*" data-key="hero" />
+        <div class="upload-zone-content" id="heroContent">
+          <div class="upload-icon">⬆</div>
+          <div class="upload-title">Hero Banner</div>
+          <div class="upload-hint">1440×600px · Full-width background</div>
+        </div>
+        <div class="image-preview-wrap" id="heroPrev">
+          <img id="heroImg" src="" alt="" />
+          <div class="img-name" id="heroFileName"></div>
+          <button class="remove-btn" onclick="removeImage(event,'heroInput','heroPrev','heroContent','hero')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Content 1 -->
+      <div class="image-upload-zone" id="c1Zone" onclick="triggerImageUpload('c1Input')">
+        <input type="file" id="c1Input" accept="image/*" data-key="content1" />
+        <div class="upload-zone-content" id="c1Content">
+          <div class="upload-icon">⬆</div>
+          <div class="upload-title">Content Image 1</div>
+          <div class="upload-hint">800×600px · Text left, image right</div>
+        </div>
+        <div class="image-preview-wrap" id="c1Prev">
+          <img id="c1Img" src="" alt="" />
+          <div class="img-name" id="c1FileName"></div>
+          <button class="remove-btn" onclick="removeImage(event,'c1Input','c1Prev','c1Content','content1')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Content 2 -->
+      <div class="image-upload-zone" id="c2Zone" onclick="triggerImageUpload('c2Input')">
+        <input type="file" id="c2Input" accept="image/*" data-key="content2" />
+        <div class="upload-zone-content" id="c2Content">
+          <div class="upload-icon">⬆</div>
+          <div class="upload-title">Content Image 2</div>
+          <div class="upload-hint">800×600px · Image left, text right</div>
+        </div>
+        <div class="image-preview-wrap" id="c2Prev">
+          <img id="c2Img" src="" alt="" />
+          <div class="img-name" id="c2FileName"></div>
+          <button class="remove-btn" onclick="removeImage(event,'c2Input','c2Prev','c2Content','content2')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Content 3 -->
+      <div class="image-upload-zone" id="c3Zone" onclick="triggerImageUpload('c3Input')">
+        <input type="file" id="c3Input" accept="image/*" data-key="content3" />
+        <div class="upload-zone-content" id="c3Content">
+          <div class="upload-icon">⬆</div>
+          <div class="upload-title">Content Image 3</div>
+          <div class="upload-hint">800×600px · Dark section</div>
+        </div>
+        <div class="image-preview-wrap" id="c3Prev">
+          <img id="c3Img" src="" alt="" />
+          <div class="img-name" id="c3FileName"></div>
+          <button class="remove-btn" onclick="removeImage(event,'c3Input','c3Prev','c3Content','content3')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Card 1 -->
+      <div class="image-upload-zone" id="card1Zone" onclick="triggerImageUpload('card1Input')">
+        <input type="file" id="card1Input" accept="image/*" data-key="card1" />
+        <div class="upload-zone-content" id="card1Content">
+          <div class="upload-icon">⬆</div>
+          <div class="upload-title">App Card 1</div>
+          <div class="upload-hint">400×500px</div>
+        </div>
+        <div class="image-preview-wrap" id="card1Prev">
+          <img id="card1Img" src="" alt="" />
+          <div class="img-name" id="card1FileName"></div>
+          <button class="remove-btn" onclick="removeImage(event,'card1Input','card1Prev','card1Content','card1')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="image-upload-zone" id="card2Zone" onclick="triggerImageUpload('card2Input')">
+        <input type="file" id="card2Input" accept="image/*" data-key="card2" />
+        <div class="upload-zone-content" id="card2Content">
+          <div class="upload-icon">⬆</div>
+          <div class="upload-title">App Card 2</div>
+          <div class="upload-hint">400×500px</div>
+        </div>
+        <div class="image-preview-wrap" id="card2Prev">
+          <img id="card2Img" src="" alt="" />
+          <div class="img-name" id="card2FileName"></div>
+          <button class="remove-btn" onclick="removeImage(event,'card2Input','card2Prev','card2Content','card2')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="image-upload-zone" id="card3Zone" onclick="triggerImageUpload('card3Input')">
+        <input type="file" id="card3Input" accept="image/*" data-key="card3" />
+        <div class="upload-zone-content" id="card3Content">
+          <div class="upload-icon">⬆</div>
+          <div class="upload-title">App Card 3</div>
+          <div class="upload-hint">400×500px</div>
+        </div>
+        <div class="image-preview-wrap" id="card3Prev">
+          <img id="card3Img" src="" alt="" />
+          <div class="img-name" id="card3FileName"></div>
+          <button class="remove-btn" onclick="removeImage(event,'card3Input','card3Prev','card3Content','card3')">&#x2715;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 6. Design Style ── -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-badge">6</div>
+      <div>
+        <div class="section-title">Design Style</div>
+      </div>
+    </div>
+
+    <label class="field-label" style="margin-bottom:14px;">Corner Radius</label>
+
+    <div class="radius-presets" id="radiusPresets">
+      <div class="radius-preset" data-value="0" onclick="selectRadius(this)">
+        <div class="radius-demo-box" style="border-radius:0px;"></div>
+        <div class="radius-preset-label">Sharp</div>
+        <div class="radius-preset-val">0px</div>
+      </div>
+      <div class="radius-preset active" data-value="6" onclick="selectRadius(this)">
+        <div class="radius-demo-box" style="border-radius:6px;"></div>
+        <div class="radius-preset-label">Default</div>
+        <div class="radius-preset-val">6px</div>
+      </div>
+      <div class="radius-preset" data-value="custom" onclick="selectRadius(this)">
+        <div class="radius-demo-box" style="border-radius:12px;border:2px dashed rgba(255,255,255,0.5);background:transparent;border:2px dashed var(--green);opacity:1;"></div>
+        <div class="radius-preset-label">Custom</div>
+        <div class="radius-preset-val">— px</div>
+      </div>
+    </div>
+
+    <div class="radius-custom-wrap" id="radiusCustomWrap">
+      <input type="number" id="customRadiusInput" class="radius-custom-input" value="12" min="0" max="99" placeholder="12" />
+      <span class="radius-unit">px</span>
+    </div>
+
+    <div style="margin-top:28px;">
+      <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+        <span style="font-size:14px;color:var(--ink);">Color section backgrounds</span>
+        <input type="checkbox" id="coloredSections" style="width:16px;height:16px;cursor:pointer;" onchange="data.coloredSections = this.checked" />
+      </label>
+    </div>
+
+    <div style="margin-top:24px;">
+      <label class="field-label">Button Color</label>
+      <p style="font-size:13px;color:#888;margin-bottom:10px;">Pick from your palette or choose a custom color.</p>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;" id="btnColorRow">
+        <input type="color" id="buttonColorPicker" value="#1E3D2F" style="width:38px;height:38px;border:1px solid #e0ddd8;border-radius:6px;cursor:pointer;padding:2px;" oninput="data.buttonColor = this.value; syncBtnColorSwatches()" />
+        <span style="font-size:13px;color:#888;">or pick from palette →</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="btnColorSwatches"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Generate button -->
+<div class="generate-wrap">
+  <div class="generate-inner">
+    <button class="generate-btn" id="generateBtn" onclick="generate()">Generate Brand Guide →</button>
+    <div class="gen-error" id="genError"></div>
+  </div>
+</div>
+
+<script>
+  // ── State ──
+  const data = {
+    brandName: '',
+    tagline: '',
+    logoSvg: null,
+    logoPng: null,
+    logoDark: null,
+    logoLight: null,
+    logoIcon: null,
+    primaryFont: 'Playfair Display',
+    secondaryFont: 'DM Sans',
+    colors: [
+      { hex: '#1E3D2F', name: 'Forest',   group: 'primary', fixed: true },
+      { hex: '#C4874A', name: 'Amber',    group: 'accent',  fixed: true },
+      { hex: '#F4EFE6', name: 'Parchment',group: 'neutral', fixed: true },
+      { hex: '#0D2018', name: 'Midnight', group: 'neutral', fixed: true },
+    ],
+    borderRadius: '6',
+    coloredSections: false,
+    capitalizeHeadings: false,
+    buttonColor: null,
+    images: {
+      hero: null, content1: null, content2: null, content3: null,
+      card1: null, card2: null, card3: null
+    }
+  };
+
+  let loadedFonts = new Set(['DM Sans']);
+
+  // ── Font loading ──
+  function loadFont(name) {
+    if (loadedFonts.has(name)) return;
+    const encoded = name.replace(/ /g, '+');
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${encoded}:wght@300;400;500;600;700&display=swap`;
+    document.head.appendChild(link);
+    loadedFonts.add(name);
+  }
+
+  function onFontChange(selectId, previewId) {
+    const name = document.getElementById(selectId).value;
+    loadFont(name);
+    const preview = document.getElementById(previewId);
+    preview.style.fontFamily = `'${name}', serif`;
+  }
+
+  // ── Upload zones setup ──
+  function triggerUpload(inputId) {
+    document.getElementById(inputId).click();
+  }
+
+  // SVG upload
+  document.getElementById('svgInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(ev.target.result)));
+      data.logoSvg = `data:image/svg+xml;base64,${base64}`;
+      document.getElementById('svgThumb').src = data.logoSvg;
+      document.getElementById('svgName').textContent = file.name;
+      document.getElementById('svgContent').style.display = 'none';
+      document.getElementById('svgPreview').classList.add('visible');
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  // PNG upload
+  document.getElementById('pngInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    compressImage(file, 1200, 0.85, function(dataUrl) {
+      data.logoPng = dataUrl;
+      document.getElementById('pngThumb').src = dataUrl;
+      document.getElementById('pngName').textContent = file.name;
+      document.getElementById('pngContent').style.display = 'none';
+      document.getElementById('pngPreview').classList.add('visible');
+    });
+  });
+
+  // Generic logo variant upload handler (SVG or PNG)
+  function handleLogoVariant(inputId, stateKey, thumbId, nameId, contentId, previewId) {
+    document.getElementById(inputId).addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          const base64 = btoa(String.fromCharCode(...new Uint8Array(ev.target.result)));
+          data[stateKey] = `data:image/svg+xml;base64,${base64}`;
+          document.getElementById(thumbId).src = data[stateKey];
+          document.getElementById(nameId).textContent = file.name;
+          document.getElementById(contentId).style.display = 'none';
+          document.getElementById(previewId).classList.add('visible');
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        compressImage(file, 1200, 0.85, function(dataUrl) {
+          data[stateKey] = dataUrl;
+          document.getElementById(thumbId).src = dataUrl;
+          document.getElementById(nameId).textContent = file.name;
+          document.getElementById(contentId).style.display = 'none';
+          document.getElementById(previewId).classList.add('visible');
+        });
+      }
+    });
+  }
+
+  handleLogoVariant('logoDarkInput',  'logoDark',  'logoDarkThumb',  'logoDarkName',  'logoDarkContent',  'logoDarkPreview');
+  handleLogoVariant('logoLightInput', 'logoLight', 'logoLightThumb', 'logoLightName', 'logoLightContent', 'logoLightPreview');
+  handleLogoVariant('logoIconInput',  'logoIcon',  'logoIconThumb',  'logoIconName',  'logoIconContent',  'logoIconPreview');
+
+  function removeUpload(e, inputId, previewId, contentId, thumbId, nameId, dataKey) {
+    e.stopPropagation();
+    data[dataKey] = null;
+    document.getElementById(inputId).value = '';
+    document.getElementById(thumbId).src = '';
+    document.getElementById(nameId).textContent = '';
+    document.getElementById(previewId).classList.remove('visible');
+    document.getElementById(contentId).style.display = '';
+  }
+
+  // Drag and drop for logo zones
+  ['svgZone', 'pngZone', 'logoDarkZone', 'logoLightZone', 'logoIconZone'].forEach(zoneId => {
+    const zone = document.getElementById(zoneId);
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      const inputMap = { svgZone: 'svgInput', pngZone: 'pngInput', logoDarkZone: 'logoDarkInput', logoLightZone: 'logoLightInput', logoIconZone: 'logoIconInput' };
+      const inputId = inputMap[zoneId] || (zoneId.replace('Zone', 'Input'));
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById(inputId).files = dt.files;
+      document.getElementById(inputId).dispatchEvent(new Event('change'));
+    });
+  });
+
+  // ── Color swatches ──
+  const FIXED_GROUPS = [
+    { key: 'primary', label: 'Primary' },
+    { key: 'accent',  label: 'Accent' },
+    { key: 'neutral', label: 'Neutrals' },
+  ];
+
+  function renderSwatches() {
+    const list = document.getElementById('swatchesList');
+    list.innerHTML = '';
+
+    // Render fixed groups
+    FIXED_GROUPS.forEach(({ key, label }) => {
+      const groupColors = data.colors.filter(c => c.group === key);
+      if (!groupColors.length) return;
+      const group = document.createElement('div');
+      group.className = 'swatch-group';
+      group.innerHTML = `<div class="swatch-group-label">${label}</div>`;
+      groupColors.forEach(c => {
+        const i = data.colors.indexOf(c);
+        const row = document.createElement('div');
+        row.className = 'swatch-row';
+        row.innerHTML = `
+          <input type="color" class="swatch-picker" value="${c.hex}" oninput="updateSwatchColor(${i}, this.value)" />
+          <span class="swatch-hex">${c.hex}</span>
+          <input type="text" class="swatch-name" value="${c.name}" placeholder="Color name" oninput="updateSwatchName(${i}, this.value)" />
+          <span style="width:28px;flex-shrink:0;"></span>
+        `;
+        group.appendChild(row);
+      });
+      list.appendChild(group);
+    });
+
+    // Render custom (deletable) colors
+    const customColors = data.colors.filter(c => c.group === 'custom');
+    if (customColors.length) {
+      const group = document.createElement('div');
+      group.className = 'swatch-group';
+      group.innerHTML = `<div class="swatch-group-label">Additional</div>`;
+      customColors.forEach(c => {
+        const i = data.colors.indexOf(c);
+        const row = document.createElement('div');
+        row.className = 'swatch-row';
+        row.innerHTML = `
+          <input type="color" class="swatch-picker" value="${c.hex}" oninput="updateSwatchColor(${i}, this.value)" />
+          <span class="swatch-hex">${c.hex}</span>
+          <input type="text" class="swatch-name" value="${c.name}" placeholder="Color name" oninput="updateSwatchName(${i}, this.value)" />
+          <button class="swatch-remove" onclick="removeSwatch(${i})" title="Remove color">&#x2715;</button>
+        `;
+        group.appendChild(row);
+      });
+      list.appendChild(group);
+    }
+  }
+
+  function updateSwatchColor(i, val) {
+    data.colors[i].hex = val;
+    renderSwatches();
+    renderBtnColorSwatches();
+  }
+
+  function updateSwatchName(i, val) {
+    data.colors[i].name = val;
+  }
+
+  function addSwatch() {
+    const randomHex = '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
+    data.colors.push({ hex: randomHex, name: 'New Color', group: 'custom', fixed: false });
+    renderSwatches();
+    renderBtnColorSwatches();
+  }
+
+  function removeSwatch(i) {
+    if (data.colors[i] && data.colors[i].fixed) return;
+    data.colors.splice(i, 1);
+    renderSwatches();
+    renderBtnColorSwatches();
+  }
+
+  // ── Image uploads ──
+  function triggerImageUpload(inputId) {
+    document.getElementById(inputId).click();
+  }
+
+  const imageSlots = [
+    { input: 'heroInput', prev: 'heroPrev', content: 'heroContent', img: 'heroImg', name: 'heroFileName', key: 'hero' },
+    { input: 'c1Input', prev: 'c1Prev', content: 'c1Content', img: 'c1Img', name: 'c1FileName', key: 'content1' },
+    { input: 'c2Input', prev: 'c2Prev', content: 'c2Content', img: 'c2Img', name: 'c2FileName', key: 'content2' },
+    { input: 'c3Input', prev: 'c3Prev', content: 'c3Content', img: 'c3Img', name: 'c3FileName', key: 'content3' },
+    { input: 'card1Input', prev: 'card1Prev', content: 'card1Content', img: 'card1Img', name: 'card1FileName', key: 'card1' },
+    { input: 'card2Input', prev: 'card2Prev', content: 'card2Content', img: 'card2Img', name: 'card2FileName', key: 'card2' },
+    { input: 'card3Input', prev: 'card3Prev', content: 'card3Content', img: 'card3Img', name: 'card3FileName', key: 'card3' },
+  ];
+
+  imageSlots.forEach(slot => {
+    const input = document.getElementById(slot.input);
+    input.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 1200, 0.85, function(dataUrl) {
+        data.images[slot.key] = dataUrl;
+        document.getElementById(slot.img).src = dataUrl;
+        document.getElementById(slot.name).textContent = file.name;
+        document.getElementById(slot.prev).classList.add('visible');
+        document.getElementById(slot.content).style.display = 'none';
+      });
+    });
+
+    // Drag and drop
+    const zoneId = slot.input.replace('Input', 'Zone');
+    const zone = document.getElementById(zoneId);
+    if (zone) {
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        input.dispatchEvent(new Event('change'));
+      });
+    }
+  });
+
+  function removeImage(e, inputId, prevId, contentId, key) {
+    e.stopPropagation();
+    data.images[key] = null;
+    document.getElementById(inputId).value = '';
+    document.getElementById(prevId).classList.remove('visible');
+    document.getElementById(contentId).style.display = '';
+  }
+
+  // ── Image compression ──
+  function compressImage(file, maxSize, quality, callback) {
+    if (file.type === 'image/svg+xml') {
+      const reader = new FileReader();
+      reader.onload = e => callback(e.target.result);
+      reader.readAsDataURL(file);
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = function() {
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      callback(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = url;
+  }
+
+  // ── Border radius ──
+  function selectRadius(el) {
+    document.querySelectorAll('.radius-preset').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const val = el.dataset.value;
+    const customWrap = document.getElementById('radiusCustomWrap');
+    if (val === 'custom') {
+      customWrap.classList.add('visible');
+      data.borderRadius = document.getElementById('customRadiusInput').value || '12';
+    } else {
+      customWrap.classList.remove('visible');
+      data.borderRadius = val;
+    }
+  }
+
+  document.getElementById('customRadiusInput').addEventListener('input', function() {
+    data.borderRadius = this.value;
+  });
+
+  // ── Collect data ──
+  function collectData() {
+    data.brandName = document.getElementById('brandName').value.trim();
+    data.tagline = document.getElementById('tagline').value.trim();
+    data.primaryFont = document.getElementById('primaryFont').value;
+    data.secondaryFont = document.getElementById('secondaryFont').value;
+
+    // collect swatch names from current inputs
+    const nameInputs = document.querySelectorAll('.swatch-name');
+    nameInputs.forEach((inp, i) => {
+      if (data.colors[i]) data.colors[i].name = inp.value;
+    });
+
+    return data;
+  }
+
+  // ── Generate ──
+  function generate() {
+    const d = collectData();
+    const btn = document.getElementById('generateBtn');
+    const errEl = document.getElementById('genError');
+
+    // Validate
+    if (!d.brandName) {
+      document.getElementById('brandName').classList.add('error');
+      document.getElementById('brandNameError').classList.add('visible');
+      document.getElementById('brandName').focus();
+      btn.classList.add('shake');
+      setTimeout(() => btn.classList.remove('shake'), 500);
+      errEl.textContent = 'Please enter a brand name before generating.';
+      return;
+    }
+
+    document.getElementById('brandName').classList.remove('error');
+    document.getElementById('brandNameError').classList.remove('visible');
+    errEl.textContent = '';
+
+    try {
+      localStorage.setItem('brandGuideData', JSON.stringify(d));
+      window.location.href = 'preview.html';
+    } catch (err) {
+      errEl.textContent = 'Storage error — try reducing image sizes.';
+      btn.classList.add('shake');
+      setTimeout(() => btn.classList.remove('shake'), 500);
+    }
+  }
+
+  // ── Init ──
+  function init() {
+    // Load saved data if exists
+    try {
+      const saved = localStorage.getItem('brandGuideData');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        Object.assign(data, parsed);
+        // Migrate old colors that lack group/fixed
+        const defaultGroups = ['primary','accent','neutral','neutral'];
+        data.colors = data.colors.map((c, i) => ({
+          group: c.group || (i < defaultGroups.length ? defaultGroups[i] : 'custom'),
+          fixed: c.fixed !== undefined ? c.fixed : (i < defaultGroups.length),
+          ...c
+        }));
+        // Restore form fields
+        document.getElementById('brandName').value = data.brandName || '';
+        document.getElementById('tagline').value = data.tagline || '';
+        document.getElementById('primaryFont').value = data.primaryFont || 'Playfair Display';
+        document.getElementById('secondaryFont').value = data.secondaryFont || 'DM Sans';
+
+        // Restore logo previews
+        if (data.logoSvg) {
+          document.getElementById('svgThumb').src = data.logoSvg;
+          document.getElementById('svgName').textContent = 'logo.svg';
+          document.getElementById('svgContent').style.display = 'none';
+          document.getElementById('svgPreview').classList.add('visible');
+        }
+        if (data.logoPng) {
+          document.getElementById('pngThumb').src = data.logoPng;
+          document.getElementById('pngName').textContent = 'logo.png';
+          document.getElementById('pngContent').style.display = 'none';
+          document.getElementById('pngPreview').classList.add('visible');
+        }
+
+        ['logoDark', 'logoLight', 'logoIcon'].forEach(key => {
+          if (data[key]) {
+            const cap = key.charAt(0).toUpperCase() + key.slice(1);
+            document.getElementById(`${key}Thumb`).src = data[key];
+            document.getElementById(`${key}Name`).textContent = key + '.png';
+            document.getElementById(`${key}Content`).style.display = 'none';
+            document.getElementById(`${key}Preview`).classList.add('visible');
+          }
+        });
+
+        // Restore images
+        imageSlots.forEach(slot => {
+          const imgData = data.images && data.images[slot.key];
+          if (imgData) {
+            document.getElementById(slot.img).src = imgData;
+            document.getElementById(slot.name).textContent = slot.key;
+            document.getElementById(slot.prev).classList.add('visible');
+            document.getElementById(slot.content).style.display = 'none';
+          }
+        });
+
+        // Restore border radius
+        const br = data.borderRadius || '6';
+        const presets = document.querySelectorAll('.radius-preset');
+        let matched = false;
+        presets.forEach(p => {
+          if (p.dataset.value === br) { p.classList.add('active'); matched = true; }
+          else p.classList.remove('active');
+        });
+        if (!matched) {
+          document.querySelector('[data-value="custom"]').classList.add('active');
+          document.getElementById('radiusCustomWrap').classList.add('visible');
+          document.getElementById('customRadiusInput').value = br;
+        }
+
+        if (data.capitalizeHeadings) document.getElementById('capitalizeHeadings').checked = true;
+        if (data.coloredSections) document.getElementById('coloredSections').checked = true;
+        if (data.buttonColor) {
+          document.getElementById('buttonColorPicker').value = data.buttonColor;
+        }
+      }
+    } catch(e) {}
+
+    // Render swatches
+    renderSwatches();
+    renderBtnColorSwatches();
+
+    // Load and apply initial fonts
+    loadFont(data.primaryFont);
+    loadFont(data.secondaryFont);
+    document.getElementById('primaryPreview').style.fontFamily = `'${data.primaryFont}', serif`;
+    document.getElementById('secondaryPreview').style.fontFamily = `'${data.secondaryFont}', sans-serif`;
+  }
+
+  function renderBtnColorSwatches() {
+    const row = document.getElementById('btnColorSwatches');
+    if (!row) return;
+    row.innerHTML = '';
+    (data.colors || []).forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.cssText = `width:28px;height:28px;border-radius:50%;background:${c.hex};border:2px solid ${(data.buttonColor === c.hex || (!data.buttonColor && i === 0)) ? '#333' : 'transparent'};cursor:pointer;`;
+      btn.title = c.name || c.hex;
+      btn.onclick = () => {
+        data.buttonColor = c.hex;
+        document.getElementById('buttonColorPicker').value = c.hex;
+        renderBtnColorSwatches();
+      };
+      row.appendChild(btn);
+    });
+  }
+
+  function syncBtnColorSwatches() {
+    renderBtnColorSwatches();
+  }
+
+  init();
+</script>
+</body>
+</html>

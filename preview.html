@@ -1,0 +1,2689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brand Guide Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── CSS Variables ── */
+    :root {
+      --brand-primary: #1E3D2F;
+      --brand-secondary: #F4EFE6;
+      --brand-light: #FAF7F2;
+      --brand-dark: #0D2018;
+      --brand-radius: 4px;
+      --font-primary: 'Playfair Display', Georgia, serif;
+      --font-secondary: 'DM Sans', system-ui, sans-serif;
+
+      --sidebar-w: 320px;
+      --white: #ffffff;
+      --ink: #1a1a1a;
+      --ink-muted: #5a5a5a;
+      --border: #e8e4dc;
+      --bg: #f8f7f4;
+
+      --section-bg: #ffffff;
+      --section-bg-alt: #f5f4f1;
+      --btn-color: var(--brand-primary);
+      --heading-transform: none;
+    }
+
+    html { font-size: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-family: var(--font-secondary); color: var(--ink); background: var(--bg); }
+
+    /* ────────────────────────────────────────
+       SIDEBAR
+    ──────────────────────────────────────── */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--sidebar-w);
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 200;
+    }
+
+    .sidebar-head {
+      padding: 18px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-editing {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 4px;
+    }
+
+    .sidebar-brand-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--brand-primary);
+      text-decoration: none;
+      margin-top: 10px;
+      opacity: 0.8;
+    }
+    .back-link:hover { opacity: 1; }
+
+    .sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .sidebar-group {
+      margin-bottom: 22px;
+    }
+
+    .sidebar-group-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sb-field {
+      margin-bottom: 10px;
+    }
+    .sb-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      margin-bottom: 4px;
+    }
+    .sb-input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: var(--font-secondary);
+      font-size: 13px;
+      color: var(--ink);
+      background: var(--white);
+      outline: none;
+    }
+    .sb-input:focus { border-color: var(--brand-primary); }
+
+    select.sb-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b6b6b' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+      cursor: pointer;
+    }
+
+    /* Compact upload zones in sidebar */
+    .sb-upload {
+      border: 1.5px dashed var(--border);
+      border-radius: 4px;
+      padding: 10px 12px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: border-color 0.15s;
+      position: relative;
+    }
+    .sb-upload:hover { border-color: var(--brand-primary); }
+    .sb-upload input[type="file"] { display: none; }
+
+    .sb-upload-inner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sb-upload-icon { font-size: 14px; opacity: 0.5; flex-shrink: 0; }
+    .sb-upload-text { font-size: 11px; color: var(--ink-muted); }
+    .sb-upload-preview {
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .sb-upload-preview.visible { display: flex; }
+    .sb-upload-preview img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: 3px;
+      background: var(--bg);
+    }
+    .sb-upload-preview__name {
+      font-size: 11px;
+      color: var(--ink);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sb-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink-muted);
+      font-size: 14px;
+      padding: 2px;
+    }
+    .sb-remove:hover { color: #c0392b; }
+
+    /* Compact color swatches */
+    .sb-swatch-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .sb-swatch-picker {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px;
+      cursor: pointer;
+      background: none;
+      flex-shrink: 0;
+    }
+    .sb-swatch-name {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: var(--font-secondary);
+      font-size: 11px;
+      color: var(--ink);
+      outline: none;
+    }
+    .sb-swatch-name:focus { border-color: var(--brand-primary); }
+    .sb-swatch-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink-muted);
+      font-size: 14px;
+      line-height: 1;
+      padding: 2px;
+    }
+    .sb-swatch-remove:hover { color: #c0392b; }
+
+    .sb-add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border: 1px solid var(--brand-primary);
+      border-radius: 4px;
+      background: none;
+      color: var(--brand-primary);
+      font-family: var(--font-secondary);
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .sb-add-btn:hover { background: var(--brand-primary); color: white; }
+
+    /* Compact image grid */
+    .sb-images-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .sb-img-zone {
+      border: 1.5px dashed var(--border);
+      border-radius: 4px;
+      padding: 8px 6px;
+      cursor: pointer;
+      text-align: center;
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: border-color 0.15s;
+    }
+    .sb-img-zone:hover { border-color: var(--brand-primary); }
+    .sb-img-zone input[type="file"] { display: none; }
+    .sb-img-zone__label { font-size: 10px; color: var(--ink-muted); margin-top: 4px; }
+    .sb-img-zone__icon { font-size: 16px; opacity: 0.4; }
+    .sb-img-zone__prev {
+      display: none;
+      width: 100%;
+    }
+    .sb-img-zone__prev.visible { display: block; }
+    .sb-img-zone__prev img {
+      width: 100%;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 3px;
+    }
+    .sb-img-zone__prev .sb-remove {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    /* Radius presets in sidebar */
+    .sb-radius-row {
+      display: flex;
+      gap: 6px;
+    }
+    .sb-radius-btn {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--white);
+      transition: border-color 0.15s;
+    }
+    .sb-radius-btn.active {
+      border-color: var(--brand-primary);
+      background: rgba(30,61,47,0.04);
+    }
+    .sb-radius-demo {
+      width: 20px;
+      height: 20px;
+      background: var(--brand-primary);
+      margin: 0 auto 4px;
+      opacity: 0.6;
+    }
+    .sb-radius-label { font-size: 10px; color: var(--ink-muted); }
+
+    .sb-radius-custom {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .sb-radius-custom.visible { display: flex; }
+    .sb-radius-custom input {
+      width: 60px;
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    /* Sidebar footer */
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .export-btn {
+      width: 100%;
+      padding: 11px 16px;
+      background: var(--brand-primary);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-family: var(--font-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .export-btn:hover { background: #163326; }
+
+    .export-btn--secondary {
+      width: 100%;
+      padding: 9px 16px;
+      background: none;
+      color: var(--brand-primary);
+      border: 1.5px solid var(--brand-primary);
+      border-radius: 5px;
+      font-family: var(--font-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      margin-top: 7px;
+    }
+    .export-btn--secondary:hover { background: var(--brand-primary); color: white; }
+
+    /* ────────────────────────────────────────
+       MAIN CONTENT
+    ──────────────────────────────────────── */
+    .brand-guide {
+      margin-left: var(--sidebar-w);
+      background: var(--white);
+    }
+
+    .page-wrap { max-width: 1080px; margin: 0 auto; }
+    section { padding: 80px 60px; }
+    section.flush { padding-left: 0; padding-right: 0; }
+
+    .section-label {
+      font-family: var(--font-secondary);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 36px;
+    }
+
+    /* ── 1. Cover ── */
+    .cover {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 420px;
+      padding: 0;
+    }
+
+    .cover__main {
+      background: var(--brand-secondary);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 64px 60px;
+      gap: 32px;
+    }
+
+    .cover__eyebrow {
+      font-family: var(--font-secondary);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .cover__logo-wrap { }
+    .cover__logo-wrap img { width: 200px; height: auto; }
+
+    .logo-placeholder {
+      width: 200px;
+      height: 64px;
+      background: var(--brand-primary);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: var(--font-primary);
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .logo-placeholder--sm {
+      width: 90px;
+      height: 40px;
+      font-size: 18px;
+      border-radius: 4px;
+    }
+
+    .logo-placeholder--white {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .cover__tagline {
+      font-family: var(--font-primary);
+      font-size: 14px;
+      font-style: italic;
+      color: var(--brand-primary);
+      padding-top: 8px;
+      border-top: 1px solid rgba(30,61,47,.15);
+    }
+
+    .cover__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .cover__cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+    .cover__cell img { width: 110px; height: auto; }
+    .logo-white { filter: brightness(0) invert(1); }
+
+    .cell--dk { background: var(--brand-dark); }
+    .cell--primary { background: var(--brand-primary); }
+    .cell--secondary { background: var(--brand-secondary); }
+    .cell--white { background: var(--white); border: 1px solid #E8E3DA; }
+
+    /* ── 2. Mockup ── */
+    .mockup {
+      background: var(--brand-dark);
+      min-height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .mockup::before { display: none; }
+
+    .mockup__inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .mockup__inner img.logo-white { width: 280px; height: auto; }
+
+    .mockup__logo-placeholder {
+      width: 280px;
+      height: 80px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: var(--font-primary);
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0 auto;
+    }
+
+    .mockup__caption {
+      font-family: var(--font-secondary);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.4);
+      margin-top: 24px;
+    }
+
+    /* ── 3. Color Palette ── */
+    .palette { background: var(--white); }
+
+    .swatches-display {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .swatch-item {
+      flex: 1;
+      min-width: 100px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .swatch-item:first-child { flex: 2; }
+
+    .swatch-block { height: 120px; }
+
+    .swatch-info {
+      padding: 14px 16px 16px;
+      background: var(--section-bg-alt);
+    }
+
+    .swatch-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .swatch-hex-val {
+      font-family: var(--font-secondary);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    /* ── 4. Typography ── */
+    .typography { background: var(--section-bg-alt); }
+
+    .type-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 48px;
+      align-items: start;
+      padding: 48px 0;
+      border-top: 1px solid rgba(30,61,47,.12);
+    }
+    .type-row:first-of-type { border-top: none; padding-top: 0; }
+
+    .type-meta { padding-top: 8px; }
+    .type-lbl {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--ink-muted);
+      margin-bottom: 6px;
+    }
+    .type-name { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+    .type-style { font-size: 11px; color: var(--ink-muted); }
+
+    .type-specimen { display: flex; align-items: flex-end; gap: 48px; }
+    .type-aa { font-size: 96px; line-height: 1; color: var(--ink); }
+    .type-chars { font-size: 13px; line-height: 1.9; color: var(--ink); letter-spacing: 0.04em; }
+
+    /* ── 5. Content Samples ── */
+    .content-samples { background: var(--white); }
+
+    .content-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      padding: 64px 0;
+      border-top: 1px solid rgba(30,61,47,.1);
+    }
+    .content-row:first-of-type { border-top: none; padding-top: 0; }
+
+    .content-row--flip .content-text { order: 2; }
+    .content-row--flip .content-img-col { order: 1; }
+
+    .content-text { display: flex; flex-direction: column; gap: 20px; }
+
+    .content-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--brand-primary);
+    }
+
+    .content-headline {
+      font-family: var(--font-primary);
+      font-size: 36px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+
+    .content-body {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--ink-muted);
+      max-width: 420px;
+    }
+
+    .content-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+
+    .btn {
+      display: inline-block;
+      font-family: var(--font-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 12px 28px;
+      border-radius: var(--brand-radius);
+      text-decoration: none;
+      cursor: default;
+      border: none;
+    }
+    .btn--primary { background: var(--btn-color); color: var(--white); }
+    .btn--outline { background: transparent; color: var(--brand-primary); border: 1.5px solid var(--brand-primary); }
+    .btn--ghost { background: transparent; color: var(--ink-muted); padding-left: 0; text-decoration: underline; text-underline-offset: 3px; }
+    .btn--primary-inv { background: var(--white); color: var(--brand-dark); }
+    .btn--outline-inv { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,.5); }
+
+    .brand-guide .content-headline { text-transform: var(--heading-transform); }
+    .brand-guide .cover__tagline { text-transform: var(--heading-transform); }
+    .brand-guide .app-card__tagline { text-transform: var(--heading-transform); }
+
+    .content-img-col {
+      border-radius: 8px;
+      overflow: hidden;
+      aspect-ratio: 4 / 3;
+      position: relative;
+    }
+
+    .content-img-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .content-img-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.4;
+    }
+
+    .content-row--dark {
+      background: var(--brand-dark);
+      margin: 0 -60px;
+      padding-left: 60px;
+      padding-right: 60px;
+      border-top: none;
+    }
+    .content-row--dark .content-eyebrow { color: #00DC33; }
+    .content-row--dark .content-headline { color: var(--white); }
+    .content-row--dark .content-body { color: rgba(255,255,255,.6); }
+
+    /* ── 6. Visual Rules ── */
+    .rules { background: var(--section-bg-alt); }
+
+    .rules-list { display: flex; flex-direction: column; gap: 0; }
+
+    .rule-row {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 48px;
+      align-items: start;
+      padding: 44px 0;
+      border-top: 1px solid rgba(30,61,47,.1);
+    }
+    .rule-row:first-of-type { border-top: none; padding-top: 0; }
+
+    .rule-meta { padding-top: 4px; }
+    .rule-title {
+      font-family: var(--font-primary);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .rule-desc { font-size: 13px; line-height: 1.7; color: var(--ink-muted); }
+
+    .rule-verdict {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+    .rule-verdict--do { background: rgba(30,61,47,.1); color: var(--brand-primary); }
+    .rule-verdict--dont { background: rgba(200,40,40,.08); color: #b03030; }
+
+    .rule-examples { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .rule-example { display: flex; flex-direction: column; gap: 12px; }
+
+    .rule-example__label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .do-label { color: var(--brand-primary); }
+    .dont-label { color: #b03030; }
+
+    .rule-example__demo {
+      background: var(--white);
+      border-radius: 4px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 100px;
+      flex-wrap: wrap;
+    }
+
+    .rule-example--dont .rule-example__demo {
+      position: relative;
+      opacity: .7;
+    }
+    .rule-example--dont .rule-example__demo::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(176,48,48,.06) 6px, rgba(176,48,48,.06) 7px);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .rule-example__note { font-size: 12px; color: var(--ink-muted); line-height: 1.5; }
+
+    /* ── 7. Brand Applications ── */
+    .applications { background: var(--section-bg); }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .app-card {
+      border-radius: var(--brand-radius);
+      overflow: hidden;
+      aspect-ratio: 3 / 4;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .app-card__blob {
+      position: absolute;
+      border-radius: 50%;
+      opacity: .18;
+    }
+
+    .app-card__logo-wrap { position: relative; z-index: 1; }
+    .app-card__logo-wrap img { width: 90px; height: auto; }
+    .app-card__logo-placeholder {
+      width: 90px;
+      height: 34px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-primary);
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .app-card__body { position: relative; z-index: 1; }
+    .app-card__tagline {
+      font-family: var(--font-primary);
+      font-size: 20px;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+    .app-card__sub {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: .7;
+    }
+
+    .text-white { color: var(--white); }
+    .text-primary { color: var(--brand-primary); }
+
+    /* ── 8. Footer ── */
+    .brand-footer {
+      background: var(--brand-dark);
+      color: rgba(255,255,255,.35);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 28px 60px;
+    }
+    .brand-footer__brand { color: rgba(255,255,255,.7); font-weight: 500; }
+
+    /* ── Toggles ── */
+    .sb-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .sb-toggle {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 20px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .sb-toggle input { display: none; }
+    .sb-toggle-track {
+      position: absolute;
+      inset: 0;
+      background: #d0cec9;
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+    .sb-toggle-track::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .sb-toggle input:checked + .sb-toggle-track { background: var(--brand-primary); }
+    .sb-toggle input:checked + .sb-toggle-track::after { transform: translateX(14px); }
+
+    /* Button color palette swatches (sidebar) */
+    .sb-btn-palette-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .sb-btn-palette-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    .sb-btn-palette-swatch.active {
+      border-color: var(--ink) !important;
+      box-shadow: 0 0 0 1px white inset;
+    }
+
+    /* ────────────────────────────────────────
+       PRINT
+    ──────────────────────────────────────── */
+    /* ── Hover background editor ── */
+    [data-bg-editable] { cursor: default; }
+
+    #bgPalettePopup {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      background: rgba(12,12,12,0.90);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 10px;
+      padding: 8px 10px 10px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.45);
+      pointer-events: auto;
+      min-width: 120px;
+    }
+    #bgPalettePopup.visible { display: block; }
+    .bg-palette-popup__label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+      margin-bottom: 7px;
+      font-family: var(--font-secondary);
+    }
+    .bg-palette-popup__swatches {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      max-width: 170px;
+    }
+    .bg-palette-popup__swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      flex-shrink: 0;
+      transition: transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .bg-palette-popup__swatch:hover {
+      transform: scale(1.25);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      border-color: rgba(255,255,255,0.55);
+    }
+    .bg-palette-popup__divider {
+      width: 100%;
+      height: 1px;
+      background: rgba(255,255,255,0.12);
+      margin: 8px 0 6px;
+    }
+    /* Force all descendant text to inherit the parent's overridden color */
+    .text-override * {
+      color: inherit !important;
+    }
+    @media print {
+      #bgPalettePopup { display: none !important; }
+    }
+
+    @media print {
+      .sidebar { display: none !important; }
+      .brand-guide { margin-left: 0 !important; }
+      body { background: white; }
+      .page-wrap { max-width: 100%; }
+      section { padding-left: 40px; padding-right: 40px; break-inside: avoid; }
+      .cover { break-after: page; }
+      .mockup { break-after: page; }
+      .palette { break-after: page; }
+      .typography { break-after: page; }
+      .content-samples { break-after: page; }
+      .rules { break-after: page; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-head">
+    <div class="sidebar-editing">Editing</div>
+    <div class="sidebar-brand-name" id="sidebarBrandName">Brand Guide</div>
+    <a href="index.html" class="back-link" id="backToFormLink">&#8592; Back to form</a>
+  </div>
+
+  <div class="sidebar-scroll">
+
+    <!-- Brand -->
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Brand</div>
+      <div class="sb-field">
+        <label class="sb-label" for="sbBrandName">Brand Name</label>
+        <input type="text" id="sbBrandName" class="sb-input" placeholder="Brand name" />
+      </div>
+      <div class="sb-field">
+        <label class="sb-label" for="sbTagline">Tagline</label>
+        <input type="text" id="sbTagline" class="sb-input" placeholder="Tagline" />
+      </div>
+    </div>
+
+    <!-- Logo -->
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Logo</div>
+
+      <!-- Primary SVG -->
+      <div class="sb-upload" id="sbSvgZone" onclick="document.getElementById('sbSvgInput').click()">
+        <input type="file" id="sbSvgInput" accept=".svg,image/svg+xml" />
+        <div class="sb-upload-inner" id="sbSvgContent">
+          <span class="sb-upload-icon">⬆</span>
+          <span class="sb-upload-text">Primary logo (SVG)</span>
+        </div>
+        <div class="sb-upload-preview" id="sbSvgPreview">
+          <img id="sbSvgThumb" src="" alt="" />
+          <span class="sb-upload-preview__name" id="sbSvgName"></span>
+          <button class="sb-remove" onclick="sbRemoveLogo(event,'svg')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- PNG fallback -->
+      <div class="sb-upload" id="sbPngZone" onclick="document.getElementById('sbPngInput').click()">
+        <input type="file" id="sbPngInput" accept=".png,image/png" />
+        <div class="sb-upload-inner" id="sbPngContent">
+          <span class="sb-upload-icon">⬆</span>
+          <span class="sb-upload-text">Primary logo (PNG fallback)</span>
+        </div>
+        <div class="sb-upload-preview" id="sbPngPreview">
+          <img id="sbPngThumb" src="" alt="" />
+          <span class="sb-upload-preview__name" id="sbPngName"></span>
+          <button class="sb-remove" onclick="sbRemoveLogo(event,'png')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Dark version -->
+      <div class="sb-upload" id="sbLogoDarkZone" onclick="document.getElementById('sbLogoDarkInput').click()">
+        <input type="file" id="sbLogoDarkInput" accept=".svg,.png,image/svg+xml,image/png" />
+        <div class="sb-upload-inner" id="sbLogoDarkContent">
+          <span class="sb-upload-icon">⬆</span>
+          <span class="sb-upload-text">Dark logo (light backgrounds)</span>
+        </div>
+        <div class="sb-upload-preview" id="sbLogoDarkPreview">
+          <img id="sbLogoDarkThumb" src="" alt="" />
+          <span class="sb-upload-preview__name" id="sbLogoDarkName"></span>
+          <button class="sb-remove" onclick="sbRemoveLogo(event,'logoDark')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Light version -->
+      <div class="sb-upload" id="sbLogoLightZone" onclick="document.getElementById('sbLogoLightInput').click()">
+        <input type="file" id="sbLogoLightInput" accept=".svg,.png,image/svg+xml,image/png" />
+        <div class="sb-upload-inner" id="sbLogoLightContent">
+          <span class="sb-upload-icon">⬆</span>
+          <span class="sb-upload-text">Light logo (dark backgrounds)</span>
+        </div>
+        <div class="sb-upload-preview" id="sbLogoLightPreview">
+          <img id="sbLogoLightThumb" src="" alt="" />
+          <span class="sb-upload-preview__name" id="sbLogoLightName"></span>
+          <button class="sb-remove" onclick="sbRemoveLogo(event,'logoLight')">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Icon / mark -->
+      <div class="sb-upload" id="sbLogoIconZone" onclick="document.getElementById('sbLogoIconInput').click()">
+        <input type="file" id="sbLogoIconInput" accept=".svg,.png,image/svg+xml,image/png" />
+        <div class="sb-upload-inner" id="sbLogoIconContent">
+          <span class="sb-upload-icon">⬆</span>
+          <span class="sb-upload-text">Logo icon / brandmark</span>
+        </div>
+        <div class="sb-upload-preview" id="sbLogoIconPreview">
+          <img id="sbLogoIconThumb" src="" alt="" />
+          <span class="sb-upload-preview__name" id="sbLogoIconName"></span>
+          <button class="sb-remove" onclick="sbRemoveLogo(event,'logoIcon')">&#x2715;</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Fonts -->
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Fonts</div>
+      <div class="sb-field">
+        <label class="sb-label" for="sbPrimaryFont">Primary</label>
+        <select id="sbPrimaryFont" class="sb-input" onchange="onSbFontChange()">
+          <optgroup label="Serif">
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Lora">Lora</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="EB Garamond">EB Garamond</option>
+            <option value="Cormorant Garamond">Cormorant Garamond</option>
+            <option value="Libre Baskerville">Libre Baskerville</option>
+            <option value="DM Serif Display">DM Serif Display</option>
+            <option value="Spectral">Spectral</option>
+            <option value="Crimson Pro">Crimson Pro</option>
+            <option value="Fraunces">Fraunces</option>
+          </optgroup>
+          <optgroup label="Sans-serif">
+            <option value="Inter">Inter</option>
+            <option value="DM Sans">DM Sans</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Raleway">Raleway</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Nunito">Nunito</option>
+            <option value="Work Sans">Work Sans</option>
+            <option value="Outfit">Outfit</option>
+            <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+            <option value="Manrope">Manrope</option>
+            <option value="Space Grotesk">Space Grotesk</option>
+            <option value="Figtree">Figtree</option>
+            <option value="Urbanist">Urbanist</option>
+            <option value="Syne">Syne</option>
+          </optgroup>
+          <optgroup label="Display">
+            <option value="Oswald">Oswald</option>
+            <option value="Bebas Neue">Bebas Neue</option>
+            <option value="Abril Fatface">Abril Fatface</option>
+            <option value="Anton">Anton</option>
+            <option value="Josefin Sans">Josefin Sans</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="sb-field">
+        <label class="sb-label" for="sbSecondaryFont">Secondary</label>
+        <select id="sbSecondaryFont" class="sb-input" onchange="onSbFontChange()">
+          <optgroup label="Serif">
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Lora">Lora</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="EB Garamond">EB Garamond</option>
+            <option value="Cormorant Garamond">Cormorant Garamond</option>
+            <option value="Libre Baskerville">Libre Baskerville</option>
+            <option value="DM Serif Display">DM Serif Display</option>
+            <option value="Spectral">Spectral</option>
+            <option value="Crimson Pro">Crimson Pro</option>
+            <option value="Fraunces">Fraunces</option>
+          </optgroup>
+          <optgroup label="Sans-serif">
+            <option value="Inter">Inter</option>
+            <option value="DM Sans">DM Sans</option>
+            <option value="Poppins">Poppins</option>
+            <option value="Raleway">Raleway</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Nunito">Nunito</option>
+            <option value="Work Sans">Work Sans</option>
+            <option value="Outfit">Outfit</option>
+            <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+            <option value="Manrope">Manrope</option>
+            <option value="Space Grotesk">Space Grotesk</option>
+            <option value="Figtree">Figtree</option>
+            <option value="Urbanist">Urbanist</option>
+            <option value="Syne">Syne</option>
+          </optgroup>
+          <optgroup label="Display">
+            <option value="Oswald">Oswald</option>
+            <option value="Bebas Neue">Bebas Neue</option>
+            <option value="Abril Fatface">Abril Fatface</option>
+            <option value="Anton">Anton</option>
+            <option value="Josefin Sans">Josefin Sans</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <!-- Colors -->
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Colors</div>
+      <div id="sbSwatchesList"></div>
+      <button class="sb-add-btn" onclick="sbAddSwatch()">+ Add Color</button>
+    </div>
+
+    <!-- Images -->
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Images</div>
+      <div class="sb-images-grid">
+        <div class="sb-img-zone" style="grid-column:1/-1;" id="sbHeroZone" onclick="document.getElementById('sbHeroInput').click()">
+          <input type="file" id="sbHeroInput" accept="image/*" data-key="hero" />
+          <span class="sb-img-zone__icon">⬆</span>
+          <span class="sb-img-zone__label">Hero</span>
+          <div class="sb-img-zone__prev" id="sbHeroPrev">
+            <img id="sbHeroImg" src="" alt="" />
+            <button class="sb-remove" onclick="sbRemoveImage(event,'hero')">&#x2715;</button>
+          </div>
+        </div>
+        <div class="sb-img-zone" id="sbC1Zone" onclick="document.getElementById('sbC1Input').click()">
+          <input type="file" id="sbC1Input" accept="image/*" data-key="content1" />
+          <span class="sb-img-zone__icon">⬆</span>
+          <span class="sb-img-zone__label">Content 1</span>
+          <div class="sb-img-zone__prev" id="sbC1Prev">
+            <img id="sbC1Img" src="" alt="" />
+            <button class="sb-remove" onclick="sbRemoveImage(event,'content1')">&#x2715;</button>
+          </div>
+        </div>
+        <div class="sb-img-zone" id="sbC2Zone" onclick="document.getElementById('sbC2Input').click()">
+          <input type="file" id="sbC2Input" accept="image/*" data-key="content2" />
+          <span class="sb-img-zone__icon">⬆</span>
+          <span class="sb-img-zone__label">Content 2</span>
+          <div class="sb-img-zone__prev" id="sbC2Prev">
+            <img id="sbC2Img" src="" alt="" />
+            <button class="sb-remove" onclick="sbRemoveImage(event,'content2')">&#x2715;</button>
+          </div>
+        </div>
+        <div class="sb-img-zone" id="sbC3Zone" onclick="document.getElementById('sbC3Input').click()">
+          <input type="file" id="sbC3Input" accept="image/*" data-key="content3" />
+          <span class="sb-img-zone__icon">⬆</span>
+          <span class="sb-img-zone__label">Content 3</span>
+          <div class="sb-img-zone__prev" id="sbC3Prev">
+            <img id="sbC3Img" src="" alt="" />
+            <button class="sb-remove" onclick="sbRemoveImage(event,'content3')">&#x2715;</button>
+          </div>
+        </div>
+        <div class="sb-img-zone" id="sbCard1Zone" onclick="document.getElementById('sbCard1Input').click()">
+          <input type="file" id="sbCard1Input" accept="image/*" data-key="card1" />
+          <span class="sb-img-zone__icon">⬆</span>
+          <span class="sb-img-zone__label">Card 1</span>
+          <div class="sb-img-zone__prev" id="sbCard1Prev">
+            <img id="sbCard1Img" src="" alt="" />
+            <button class="sb-remove" onclick="sbRemoveImage(event,'card1')">&#x2715;</button>
+          </div>
+        </div>
+        <div class="sb-img-zone" id="sbCard2Zone" onclick="document.getElementById('sbCard2Input').click()">
+          <input type="file" id="sbCard2Input" accept="image/*" data-key="card2" />
+          <span class="sb-img-zone__icon">⬆</span>
+          <span class="sb-img-zone__label">Card 2</span>
+          <div class="sb-img-zone__prev" id="sbCard2Prev">
+            <img id="sbCard2Img" src="" alt="" />
+            <button class="sb-remove" onclick="sbRemoveImage(event,'card2')">&#x2715;</button>
+          </div>
+        </div>
+        <div class="sb-img-zone" id="sbCard3Zone" onclick="document.getElementById('sbCard3Input').click()">
+          <input type="file" id="sbCard3Input" accept="image/*" data-key="card3" />
+          <span class="sb-img-zone__icon">⬆</span>
+          <span class="sb-img-zone__label">Card 3</span>
+          <div class="sb-img-zone__prev" id="sbCard3Prev">
+            <img id="sbCard3Img" src="" alt="" />
+            <button class="sb-remove" onclick="sbRemoveImage(event,'card3')">&#x2715;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Design -->
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Design</div>
+      <label class="sb-label" style="margin-bottom:8px;">Corner Radius</label>
+      <div class="sb-radius-row" id="sbRadiusRow">
+        <div class="sb-radius-btn" data-value="0" onclick="sbSelectRadius(this)">
+          <div class="sb-radius-demo" style="border-radius:0;"></div>
+          <div class="sb-radius-label">Sharp</div>
+        </div>
+        <div class="sb-radius-btn" data-value="6" onclick="sbSelectRadius(this)">
+          <div class="sb-radius-demo" style="border-radius:6px;"></div>
+          <div class="sb-radius-label">Default</div>
+        </div>
+        <div class="sb-radius-btn" data-value="custom" onclick="sbSelectRadius(this)">
+          <div class="sb-radius-demo" style="border-radius:12px;background:transparent;border:1.5px dashed var(--brand-primary);opacity:1;"></div>
+          <div class="sb-radius-label">Custom</div>
+        </div>
+      </div>
+      <div class="sb-radius-custom" id="sbRadiusCustom">
+        <input type="number" id="sbRadiusInput" min="0" max="99" value="12" />
+        <span style="font-size:12px;color:var(--ink-muted)">px</span>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div class="sb-toggle-row">
+          <span class="sb-label" style="margin-bottom:0;">Color section backgrounds</span>
+          <label class="sb-toggle">
+            <input type="checkbox" id="sbColoredSections" />
+            <span class="sb-toggle-track"></span>
+          </label>
+        </div>
+        <div class="sb-toggle-row">
+          <span class="sb-label" style="margin-bottom:0;">Capitalize headings</span>
+          <label class="sb-toggle">
+            <input type="checkbox" id="sbCapitalizeHeadings" />
+            <span class="sb-toggle-track"></span>
+          </label>
+        </div>
+        <label class="sb-label" style="margin-top:4px;margin-bottom:6px;">Button Color</label>
+        <div class="sb-btn-palette-row" id="sbBtnPaletteRow"></div>
+        <input type="color" id="sbBtnColorPicker" class="sb-swatch-picker" title="Custom button color" />
+      </div>
+    </div>
+
+  </div><!-- /sidebar-scroll -->
+
+  <div class="sidebar-footer">
+    <button class="export-btn" onclick="exportPDF()">Export PDF</button>
+    <button class="export-btn--secondary" onclick="exportMarkdown()">Export Markdown</button>
+  </div>
+</aside>
+
+<!-- ════════════════════════════════════════
+     BRAND GUIDE MAIN CONTENT
+════════════════════════════════════════ -->
+<div class="brand-guide">
+<div class="page-wrap">
+
+  <!-- ── 1. Cover ── -->
+  <section class="cover flush">
+    <div class="cover__main" id="coverMain" data-bg-editable="coverMain">
+      <span class="cover__eyebrow">Brand Identity Guidelines</span>
+      <div class="cover__logo-wrap" id="coverLogoWrap">
+        <!-- filled by JS -->
+      </div>
+      <p class="cover__tagline" id="coverTagline">Design. Create. Inspire.</p>
+    </div>
+    <div class="cover__grid">
+      <div class="cover__cell cell--dk" id="coverCell1" data-bg-editable="coverCell1"><!-- filled by JS --></div>
+      <div class="cover__cell cell--primary" id="coverCell2" data-bg-editable="coverCell2"><!-- filled by JS --></div>
+      <div class="cover__cell cell--secondary" id="coverCell3" data-bg-editable="coverCell3"><!-- filled by JS --></div>
+      <div class="cover__cell cell--white" id="coverCell4" data-bg-editable="coverCell4"><!-- filled by JS --></div>
+    </div>
+  </section>
+
+  <!-- ── 2. Mockup Banner ── -->
+  <section class="mockup flush" id="mockupSection" data-bg-editable="mockupSection">
+    <div class="mockup__inner" id="mockupInner">
+      <!-- filled by JS -->
+    </div>
+  </section>
+
+  <!-- ── 3. Color Palette ── -->
+  <section class="palette">
+    <p class="section-label">Color palette</p>
+    <div class="swatches-display" id="paletteDisplay">
+      <!-- filled by JS -->
+    </div>
+  </section>
+
+  <!-- ── 4. Typography ── -->
+  <section class="typography">
+    <p class="section-label">Typography</p>
+    <div id="typographyDisplay">
+      <!-- filled by JS -->
+    </div>
+  </section>
+
+  <!-- ── 5. Content Samples ── -->
+  <section class="content-samples">
+    <p class="section-label">Content &amp; layout samples</p>
+
+    <!-- Row A: text left, image right -->
+    <div class="content-row">
+      <div class="content-text">
+        <span class="content-eyebrow">Our approach</span>
+        <h2 class="content-headline">Great design starts with a clear idea.</h2>
+        <p class="content-body">Every brand is built on intention. We craft identities that don't just look good — they communicate who you are and why it matters, from the first glance to the lasting impression.</p>
+        <div class="content-actions">
+          <a class="btn btn--primary">Get started</a>
+          <a class="btn btn--outline">Learn more</a>
+        </div>
+      </div>
+      <div class="content-img-col" id="contentImg1">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- Row B: image left, text right -->
+    <div class="content-row content-row--flip">
+      <div class="content-text">
+        <span class="content-eyebrow">What we believe</span>
+        <h2 class="content-headline">Consistency builds trust over time.</h2>
+        <p class="content-body">A strong visual system isn't a constraint — it's a superpower. When your brand speaks with one voice across every touchpoint, people remember you and keep coming back.</p>
+        <div class="content-actions">
+          <a class="btn btn--primary">See our work</a>
+          <a class="btn btn--ghost">Read the story &rarr;</a>
+        </div>
+      </div>
+      <div class="content-img-col" id="contentImg2">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- Row C: dark background -->
+    <div class="content-row content-row--dark" id="contentRowDark" data-bg-editable="contentRowDark">
+      <div class="content-text">
+        <span class="content-eyebrow">Ready to begin?</span>
+        <h2 class="content-headline">Let's build something worth remembering.</h2>
+        <p class="content-body">From strategy to execution, we partner with founders and teams to create brands that stand out and stand the test of time. Your story deserves a great look.</p>
+        <div class="content-actions">
+          <a class="btn btn--primary-inv">Start a project</a>
+          <a class="btn btn--outline-inv">View pricing</a>
+        </div>
+      </div>
+      <div class="content-img-col" id="contentImg3">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── 6. Visual Rules ── -->
+  <section class="rules">
+    <p class="section-label">Visual language &amp; design decisions</p>
+    <div class="rules-list">
+
+      <!-- Rule 1: Edges -->
+      <div class="rule-row">
+        <div class="rule-meta">
+          <p class="rule-title">Edges &amp; corners</p>
+          <p class="rule-desc">This brand uses intentional geometry. Apply a consistent corner radius on interactive elements like buttons and inputs. Avoid overly rounded shapes that conflict with the brand's structured, confident tone.</p>
+          <span class="rule-verdict rule-verdict--do" id="radiusVerdict">Use: 0–4px radius</span>
+        </div>
+        <div class="rule-examples">
+          <div class="rule-example">
+            <span class="rule-example__label do-label">Do</span>
+            <div class="rule-example__demo" id="radiusDoDemo">
+              <div id="radiusDemoBtn" style="background:var(--brand-primary);color:white;font-family:var(--font-secondary);font-size:13px;font-weight:500;padding:12px 24px;border-radius:var(--brand-radius);">Get started</div>
+              <div id="radiusDemoCard" style="background:rgba(0,0,0,0.07);border:1px solid rgba(0,0,0,.12);width:80px;height:56px;border-radius:var(--brand-radius);"></div>
+              <div style="background:var(--brand-light);border:1px solid rgba(30,61,47,.15);width:100%;height:40px;border-radius:2px;max-width:140px;"></div>
+            </div>
+            <p class="rule-example__note" id="radiusDoNote">Buttons and cards use your chosen radius.</p>
+          </div>
+          <div class="rule-example rule-example--dont">
+            <span class="rule-example__label dont-label">Don't</span>
+            <div class="rule-example__demo">
+              <div style="background:var(--brand-primary);color:white;font-family:var(--font-secondary);font-size:13px;font-weight:500;padding:12px 24px;border-radius:9999px;">Get started</div>
+              <div style="background:rgba(0,0,0,0.07);border:1px solid rgba(0,0,0,.12);width:80px;height:56px;border-radius:20px;"></div>
+            </div>
+            <p class="rule-example__note">Avoid pill buttons and heavily rounded cards. Feels off-brand.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 2: Borders vs shadows -->
+      <div class="rule-row">
+        <div class="rule-meta">
+          <p class="rule-title">Borders vs. shadows</p>
+          <p class="rule-desc">Use thin 1px borders to separate surfaces. Reserve drop shadows for overlays and modals only — never use them to elevate cards or sections. Flat, bordered layouts feel more refined for this brand.</p>
+          <span class="rule-verdict rule-verdict--do">Use: borders for separation</span>
+        </div>
+        <div class="rule-examples">
+          <div class="rule-example">
+            <span class="rule-example__label do-label">Do</span>
+            <div class="rule-example__demo" style="flex-direction:column;gap:8px;">
+              <div style="width:100%;background:var(--white);border:1px solid rgba(30,61,47,.18);border-radius:4px;padding:16px;">
+                <div style="width:60%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
+                <div style="width:90%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+              </div>
+              <div style="width:100%;background:var(--white);border:1px solid rgba(30,61,47,.18);border-radius:4px;padding:16px;">
+                <div style="width:40%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
+                <div style="width:75%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+              </div>
+            </div>
+            <p class="rule-example__note">1px border at ~18% opacity. Clean and flat.</p>
+          </div>
+          <div class="rule-example rule-example--dont">
+            <span class="rule-example__label dont-label">Don't</span>
+            <div class="rule-example__demo" style="flex-direction:column;gap:8px;">
+              <div style="width:100%;background:var(--white);box-shadow:0 8px 24px rgba(0,0,0,.15);border-radius:4px;padding:16px;">
+                <div style="width:60%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
+                <div style="width:90%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+              </div>
+              <div style="width:100%;background:var(--white);box-shadow:0 8px 24px rgba(0,0,0,.15);border-radius:4px;padding:16px;">
+                <div style="width:40%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
+                <div style="width:75%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+              </div>
+            </div>
+            <p class="rule-example__note">Heavy drop shadows on cards feel too generic and soft.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 3: Spacing -->
+      <div class="rule-row">
+        <div class="rule-meta">
+          <p class="rule-title">Spacing &amp; breathing room</p>
+          <p class="rule-desc">Give elements room to breathe. Generous whitespace is a core part of the brand's sophisticated feel. Err on the side of more space between sections and components — never crowd elements together.</p>
+          <span class="rule-verdict rule-verdict--do">Use: generous margins &amp; padding</span>
+        </div>
+        <div class="rule-examples">
+          <div class="rule-example">
+            <span class="rule-example__label do-label">Do</span>
+            <div class="rule-example__demo" style="flex-direction:column;align-items:flex-start;gap:24px;padding:32px;">
+              <div style="width:50%;height:12px;background:rgba(0,0,0,0.22);border-radius:2px;"></div>
+              <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+                <div style="width:90%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+                <div style="width:75%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+              </div>
+              <div style="background:var(--brand-primary);color:white;font-size:11px;font-family:var(--font-secondary);padding:8px 18px;border-radius:3px;">Action</div>
+            </div>
+            <p class="rule-example__note">Spacious padding. 24px+ gaps between elements.</p>
+          </div>
+          <div class="rule-example rule-example--dont">
+            <span class="rule-example__label dont-label">Don't</span>
+            <div class="rule-example__demo" style="flex-direction:column;align-items:flex-start;gap:6px;padding:10px;">
+              <div style="width:50%;height:12px;background:rgba(0,0,0,0.22);border-radius:2px;"></div>
+              <div style="width:90%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+              <div style="width:75%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+              <div style="background:var(--brand-primary);color:white;font-size:11px;font-family:var(--font-secondary);padding:6px 12px;border-radius:3px;">Action</div>
+            </div>
+            <p class="rule-example__note">Cramped spacing undermines the premium feel.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 4: Dividers -->
+      <div class="rule-row">
+        <div class="rule-meta">
+          <p class="rule-title">Dividers &amp; separators</p>
+          <p class="rule-desc">When you need to separate content, use a hairline — 1px at low opacity. Prefer whitespace alone wherever possible. Never use thick rules, decorative ornaments, or full-bleed colored dividers to break up sections.</p>
+          <span class="rule-verdict rule-verdict--do">Use: 1px lines or whitespace only</span>
+        </div>
+        <div class="rule-examples">
+          <div class="rule-example">
+            <span class="rule-example__label do-label">Do</span>
+            <div class="rule-example__demo" style="flex-direction:column;gap:20px;">
+              <div style="width:80%;height:9px;background:rgba(0,0,0,0.14);border-radius:2px;"></div>
+              <div style="width:100%;height:1px;background:rgba(30,61,47,.12);"></div>
+              <div style="width:65%;height:9px;background:rgba(0,0,0,0.14);border-radius:2px;"></div>
+            </div>
+            <p class="rule-example__note">1px hairline at ~12% opacity. Subtle and refined.</p>
+          </div>
+          <div class="rule-example rule-example--dont">
+            <span class="rule-example__label dont-label">Don't</span>
+            <div class="rule-example__demo" style="flex-direction:column;gap:16px;">
+              <div style="width:80%;height:9px;background:rgba(0,0,0,0.14);border-radius:2px;"></div>
+              <div style="width:100%;height:4px;background:rgba(0,0,0,0.3);"></div>
+              <div style="width:65%;height:9px;background:rgba(0,0,0,0.14);border-radius:2px;"></div>
+            </div>
+            <p class="rule-example__note">Thick or colored rules feel heavy and dated.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 5: Color usage -->
+      <div class="rule-row">
+        <div class="rule-meta">
+          <p class="rule-title">Color on surfaces</p>
+          <p class="rule-desc">Use brand colors as background blocks, not as text highlights or decorative fills on small elements. The primary color should anchor large surface areas — not be sprinkled throughout as accents. Keep most surfaces in light tones.</p>
+          <span class="rule-verdict rule-verdict--do">Use: color in large blocks</span>
+        </div>
+        <div class="rule-examples">
+          <div class="rule-example">
+            <span class="rule-example__label do-label">Do</span>
+            <div class="rule-example__demo" style="padding:0;overflow:hidden;border-radius:4px;">
+              <div style="background:var(--brand-primary);padding:20px 24px;width:100%;">
+                <div style="width:55%;height:10px;background:rgba(255,255,255,.5);border-radius:2px;margin-bottom:10px;"></div>
+                <div style="width:80%;height:7px;background:rgba(255,255,255,.3);border-radius:2px;"></div>
+              </div>
+              <div style="background:var(--brand-light);padding:20px 24px;width:100%;">
+                <div style="width:70%;height:7px;background:rgba(30,61,47,.15);border-radius:2px;"></div>
+              </div>
+            </div>
+            <p class="rule-example__note">Full-bleed color section, light below. Confident blocks.</p>
+          </div>
+          <div class="rule-example rule-example--dont">
+            <span class="rule-example__label dont-label">Don't</span>
+            <div class="rule-example__demo" style="flex-direction:column;align-items:flex-start;gap:10px;padding:20px;">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div style="width:10px;height:10px;background:var(--brand-primary);border-radius:2px;"></div>
+                <div style="width:80px;height:8px;background:rgba(0,0,0,0.12);border-radius:2px;"></div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div style="width:10px;height:10px;background:var(--brand-primary);border-radius:2px;opacity:0.5;"></div>
+                <div style="width:100px;height:8px;background:rgba(0,0,0,0.12);border-radius:2px;"></div>
+              </div>
+              <div style="background:var(--brand-primary);color:white;font-size:9px;font-family:var(--font-secondary);padding:3px 8px;border-radius:2px;margin-top:4px;">Tag</div>
+            </div>
+            <p class="rule-example__note">Sprinkling color on icons, tags, and bullets dilutes the brand.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── 7. Brand Applications ── -->
+  <section class="applications">
+    <p class="section-label">Brand applications</p>
+    <div class="app-grid" id="appGrid">
+      <!-- filled by JS -->
+    </div>
+  </section>
+
+  <!-- ── 8. Footer ── -->
+  <footer class="brand-footer" id="brandFooter" data-bg-editable="brandFooter">
+    <span class="brand-footer__brand" data-field="brand-name">Brand</span>
+    <span id="footerMiddle">Brand Guidelines · 2025</span>
+    <span>Confidential</span>
+  </footer>
+
+</div><!-- /page-wrap -->
+</div><!-- /brand-guide -->
+
+<script>
+  // ── State ──
+  let state = {
+    brandName: 'My Brand',
+    tagline: 'Design. Create. Inspire.',
+    logoSvg: null,
+    logoPng: null,
+    logoDark: null,
+    logoLight: null,
+    logoIcon: null,
+    primaryFont: 'Playfair Display',
+    secondaryFont: 'DM Sans',
+    colors: [
+      { hex: '#1E3D2F', name: 'Forest' },
+      { hex: '#F4EFE6', name: 'Parchment' },
+      { hex: '#FAF7F2', name: 'Ivory' },
+      { hex: '#0D2018', name: 'Midnight' }
+    ],
+    borderRadius: '6',
+    coloredSections: false,
+    capitalizeHeadings: false,
+    buttonColor: null,
+    images: { hero: null, content1: null, content2: null, content3: null, card1: null, card2: null, card3: null },
+    bgOverrides: {},
+    textOverrides: {}
+  };
+
+  let loadedFonts = new Set(['DM Sans', 'Playfair Display']);
+
+  // ── Helpers ──
+  function loadFont(name) {
+    if (loadedFonts.has(name)) return;
+    const encoded = name.replace(/ /g, '+');
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${encoded}:wght@300;400;500;600;700&display=swap`;
+    document.head.appendChild(link);
+    loadedFonts.add(name);
+  }
+
+  function setCSSVar(name, value) {
+    document.documentElement.style.setProperty(name, value);
+  }
+
+  function getInitials(name) {
+    if (!name) return '?';
+    const words = name.trim().split(/\s+/);
+    if (words.length === 1) return words[0].charAt(0).toUpperCase();
+    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+  }
+
+  function getColor(idx, fallbacks) {
+    const defaults = ['#1E3D2F', '#F4EFE6', '#FAF7F2', '#0D2018'];
+    if (state.colors && state.colors[idx]) return state.colors[idx].hex;
+    return fallbacks ? fallbacks[idx] : defaults[idx] || '#1E3D2F';
+  }
+
+  function saveState() {
+    try { localStorage.setItem('brandGuideData', JSON.stringify(state)); } catch(e) {}
+  }
+
+  // ── Apply functions ──
+
+  function applyBrandName(name) {
+    document.querySelectorAll('[data-field="brand-name"]').forEach(el => el.textContent = name);
+    document.getElementById('sidebarBrandName').textContent = name || 'Brand Guide';
+    document.title = `${name || 'Brand Guide'} — Brand Guidelines`;
+    const year = new Date().getFullYear();
+    document.getElementById('footerMiddle').textContent = `${name || 'Brand'} Guidelines · ${year}`;
+  }
+
+  function applyTagline(tagline) {
+    document.getElementById('coverTagline').textContent = tagline || '';
+    document.querySelectorAll('[data-field="tagline"]').forEach(el => el.textContent = tagline);
+  }
+
+  function applyLogo() {
+    const initials = getInitials(state.brandName);
+    const primary = state.logoSvg || state.logoPng;
+    const darkLogo  = state.logoDark  || primary;   // use on light backgrounds (no filter)
+    const lightLogo = state.logoLight || primary;   // use on dark backgrounds
+    const useLightFilter = !state.logoLight && !!primary; // true = no explicit light logo, apply CSS filter
+
+    // Cover main logo (light background)
+    const coverWrap = document.getElementById('coverLogoWrap');
+    if (darkLogo) {
+      coverWrap.innerHTML = `<img class="logo-instance" src="${darkLogo}" style="width:200px;height:auto;" alt="Logo" />`;
+    } else {
+      coverWrap.innerHTML = `<div class="logo-placeholder"><span>${initials}</span></div>`;
+    }
+
+    // Cover grid cells
+    const cells = [
+      { el: document.getElementById('coverCell1'), white: true },
+      { el: document.getElementById('coverCell2'), white: true },
+      { el: document.getElementById('coverCell3'), white: false },
+      { el: document.getElementById('coverCell4'), white: false },
+    ];
+
+    cells.forEach(cell => {
+      const iconSrc = state.logoIcon; // prefer standalone icon/brandmark
+      if (cell.white) {
+        // dark background cell — needs white/light asset
+        if (iconSrc) {
+          const needsFilter = !state.logoLight;
+          const cls = needsFilter ? 'logo-instance logo-white' : 'logo-instance';
+          cell.el.innerHTML = `<img class="${cls}" src="${iconSrc}" style="width:60px;height:auto;" alt="Logo" />`;
+        } else if (lightLogo) {
+          const cls = useLightFilter ? 'logo-instance logo-white' : 'logo-instance';
+          cell.el.innerHTML = `<img class="${cls}" src="${lightLogo}" style="width:110px;height:auto;" alt="Logo" />`;
+        } else {
+          cell.el.innerHTML = `<div class="logo-placeholder logo-placeholder--sm logo-placeholder--white">${initials}</div>`;
+        }
+      } else {
+        // light background cell — needs dark asset
+        if (iconSrc) {
+          cell.el.innerHTML = `<img class="logo-instance" src="${iconSrc}" style="width:60px;height:auto;" alt="Logo" />`;
+        } else if (darkLogo) {
+          cell.el.innerHTML = `<img class="logo-instance" src="${darkLogo}" style="width:110px;height:auto;" alt="Logo" />`;
+        } else {
+          cell.el.innerHTML = `<div class="logo-placeholder logo-placeholder--sm">${initials}</div>`;
+        }
+      }
+    });
+
+    // Mockup banner (dark background)
+    const mockupInner = document.getElementById('mockupInner');
+    if (lightLogo) {
+      const cls = useLightFilter ? 'logo-instance logo-white' : 'logo-instance';
+      mockupInner.innerHTML = `<img class="${cls}" src="${lightLogo}" style="width:280px;height:auto;" alt="Logo" /><p class="mockup__caption">Brand in context</p>`;
+    } else {
+      mockupInner.innerHTML = `<div class="mockup__logo-placeholder">${initials}</div><p class="mockup__caption">Brand in context</p>`;
+    }
+
+    renderAppCards();
+  }
+
+  function applyColors(colors) {
+    const c0 = colors[0] ? colors[0].hex : '#1E3D2F';
+    const c1 = colors[1] ? colors[1].hex : '#F4EFE6';
+    const c2 = colors[2] ? colors[2].hex : '#FAF7F2';
+    const c3 = colors[3] ? colors[3].hex : '#0D2018';
+
+    setCSSVar('--brand-primary', c0);
+    setCSSVar('--brand-secondary', c1);
+    setCSSVar('--brand-light', c2);
+    setCSSVar('--brand-dark', c3);
+
+    // Recalculate derived styles that depend on palette
+    applyColoredSections(state.coloredSections);
+    if (!state.buttonColor) applyButtonColor(null);
+    renderSbBtnPalette();
+
+    // Re-render palette
+    const display = document.getElementById('paletteDisplay');
+    display.innerHTML = '';
+    colors.forEach((color, i) => {
+      const item = document.createElement('div');
+      item.className = 'swatch-item';
+      item.innerHTML = `
+        <div class="swatch-block" style="background:${color.hex};"></div>
+        <div class="swatch-info">
+          <p class="swatch-name">${color.name || 'Color'}</p>
+          <p class="swatch-hex-val">${color.hex}</p>
+        </div>
+      `;
+      display.appendChild(item);
+    });
+  }
+
+  function applyFonts(primary, secondary) {
+    loadFont(primary);
+    loadFont(secondary);
+    setCSSVar('--font-primary', `'${primary}', Georgia, serif`);
+    setCSSVar('--font-secondary', `'${secondary}', system-ui, sans-serif`);
+
+    // Re-render typography
+    const display = document.getElementById('typographyDisplay');
+    display.innerHTML = `
+      <div class="type-row">
+        <div class="type-meta">
+          <p class="type-lbl">Primary</p>
+          <p class="type-name">${primary}</p>
+          <p class="type-style">Headings &amp; Display</p>
+        </div>
+        <div class="type-specimen">
+          <span class="type-aa" style="font-family:'${primary}',serif;">Aa</span>
+          <div class="type-chars" style="font-family:'${primary}',serif;">
+            ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>
+            abcdefghijklmnopqrstuvwxyz<br>
+            0123456789
+          </div>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <p class="type-lbl">Secondary</p>
+          <p class="type-name">${secondary}</p>
+          <p class="type-style">Body &amp; UI</p>
+        </div>
+        <div class="type-specimen">
+          <span class="type-aa" style="font-family:'${secondary}',sans-serif;font-weight:300;">Aa</span>
+          <div class="type-chars" style="font-family:'${secondary}',sans-serif;">
+            ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>
+            abcdefghijklmnopqrstuvwxyz<br>
+            0123456789
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function applyImages(images) {
+    // Hero
+    const mockupSection = document.getElementById('mockupSection');
+    if (images.hero) {
+      mockupSection.style.backgroundImage = `url('${images.hero}')`;
+    } else {
+      mockupSection.style.backgroundImage = '';
+    }
+
+    // Content images
+    const setContentImg = (elId, imgData, placeholderStyle, placeholderColor) => {
+      const el = document.getElementById(elId);
+      if (imgData) {
+        el.innerHTML = `<img src="${imgData}" alt="Content image" style="width:100%;height:100%;object-fit:cover;" />`;
+      } else {
+        el.innerHTML = `<div class="content-img-placeholder" style="${placeholderStyle}"><span>Image placeholder</span></div>`;
+      }
+    };
+
+    setContentImg('contentImg1', images.content1,
+      `background:var(--brand-secondary);color:var(--brand-primary);`, '');
+    setContentImg('contentImg2', images.content2,
+      `background:var(--brand-primary);opacity:.85;color:white;`, '');
+    setContentImg('contentImg3', images.content3,
+      `background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:white;`, '');
+
+    // App cards
+    renderAppCards();
+
+    // Sidebar image previews
+    const sbSlots = [
+      { key: 'hero', prev: 'sbHeroPrev', img: 'sbHeroImg' },
+      { key: 'content1', prev: 'sbC1Prev', img: 'sbC1Img' },
+      { key: 'content2', prev: 'sbC2Prev', img: 'sbC2Img' },
+      { key: 'content3', prev: 'sbC3Prev', img: 'sbC3Img' },
+      { key: 'card1', prev: 'sbCard1Prev', img: 'sbCard1Img' },
+      { key: 'card2', prev: 'sbCard2Prev', img: 'sbCard2Img' },
+      { key: 'card3', prev: 'sbCard3Prev', img: 'sbCard3Img' },
+    ];
+    sbSlots.forEach(s => {
+      const prev = document.getElementById(s.prev);
+      const imgEl = document.getElementById(s.img);
+      if (images[s.key] && imgEl) {
+        imgEl.src = images[s.key];
+        prev.classList.add('visible');
+      }
+    });
+  }
+
+  function renderAppCards() {
+    const grid = document.getElementById('appGrid');
+    if (!grid) return;
+    const primary = state.logoSvg || state.logoPng;
+    const iconSrc = state.logoIcon || state.logoLight || primary;
+    const iconNeedsFilter = !state.logoIcon && !state.logoLight && !!primary;
+    const iconCls = iconNeedsFilter ? 'logo-instance logo-white' : 'logo-instance';
+    const initials = getInitials(state.brandName);
+    const c0 = getColor(0);
+    const c1 = getColor(1);
+    const c3 = getColor(3);
+
+    const logoHtml = iconSrc
+      ? `<img class="${iconCls}" src="${iconSrc}" style="width:60px;height:auto;" alt="Logo" />`
+      : `<div class="app-card__logo-placeholder">${initials}</div>`;
+
+    const tagline = state.tagline || '';
+    const tagWords = tagline.split(/[\s.]+/).filter(Boolean);
+    const cardTaglines = [
+      tagWords.slice(0, 1).join(' ') || 'Design<br>with intent.',
+      tagWords.slice(1, 2).join(' ') || 'Create<br>your story.',
+      tagWords.slice(2, 3).join(' ') || 'Inspire<br>every detail.',
+    ];
+
+    const cards = [
+      {
+        bg: state.images.card1 ? state.images.card1 : null,
+        solidBg: c0,
+        textClass: 'text-white',
+        taglineText: tagWords.length >= 1 ? tagWords[0] + '<br>with intent.' : 'Design<br>with intent.',
+        sub: 'Brand identity &amp; strategy',
+        blobStyle: `width:200px;height:200px;background:rgba(255,255,255,0.15);top:-60px;right:-60px;`,
+      },
+      {
+        bg: state.images.card2 ? state.images.card2 : null,
+        solidBg: c1,
+        textClass: 'text-primary',
+        taglineText: tagWords.length >= 2 ? tagWords[1] + '<br>your story.' : 'Create<br>your story.',
+        sub: 'Visual identity',
+        blobStyle: `width:240px;height:240px;background:${c0};opacity:0.18;bottom:-80px;right:-80px;`,
+      },
+      {
+        bg: state.images.card3 ? state.images.card3 : null,
+        solidBg: c3,
+        textClass: 'text-white',
+        taglineText: tagWords.length >= 3 ? tagWords[2] + '<br>every detail.' : 'Inspire<br>every detail.',
+        sub: 'Creative direction',
+        blobStyle: `width:160px;height:160px;background:${c1};top:50%;left:50%;transform:translate(-50%,-50%);`,
+      },
+    ];
+
+    grid.innerHTML = '';
+    cards.forEach((card, i) => {
+      const div = document.createElement('div');
+      div.className = 'app-card';
+      div.id = `appCard${i}`;
+      div.dataset.bgEditable = `appCard${i}`;
+      if (card.bg) {
+        div.style.backgroundImage = `url('${card.bg}')`;
+        div.style.backgroundSize = 'cover';
+        div.style.backgroundPosition = 'center';
+      } else {
+        div.style.background = card.solidBg;
+      }
+
+      const blobHtml = !card.bg ? `<div class="app-card__blob" style="${card.blobStyle}"></div>` : '';
+
+      div.innerHTML = `
+        ${blobHtml}
+        <div class="app-card__logo-wrap">${logoHtml}</div>
+        <div class="app-card__body ${card.textClass}">
+          <p class="app-card__tagline">${card.taglineText}</p>
+          <p class="app-card__sub">${card.sub}</p>
+        </div>
+      `;
+      grid.appendChild(div);
+    });
+    // Re-register any newly created cards for bg editing
+    if (typeof initBgEditing === 'function') initBgEditing();
+    applyBgOverrides();
+    applyTextOverrides();
+  }
+
+  function applyBorderRadius(value) {
+    const px = value === 'custom' ? (document.getElementById('sbRadiusInput')?.value || '12') : value;
+    setCSSVar('--brand-radius', `${px}px`);
+
+    // Update verdict text
+    const verdict = document.getElementById('radiusVerdict');
+    if (verdict) verdict.textContent = `Use: ${px}px radius`;
+
+    // Update do-note
+    const doNote = document.getElementById('radiusDoNote');
+    if (doNote) doNote.textContent = `Buttons and cards use ${px}px radius. Consistent across UI.`;
+  }
+
+  function applyColoredSections(enabled) {
+    if (enabled) {
+      const c1 = state.colors[1] ? state.colors[1].hex : '#F4EFE6';
+      const c2 = state.colors[2] ? state.colors[2].hex : '#f5f4f1';
+      setCSSVar('--section-bg', c1);
+      setCSSVar('--section-bg-alt', c2);
+    } else {
+      setCSSVar('--section-bg', '#ffffff');
+      setCSSVar('--section-bg-alt', '#f5f4f1');
+    }
+  }
+
+  function applyCapitalizeHeadings(enabled) {
+    setCSSVar('--heading-transform', enabled ? 'uppercase' : 'none');
+  }
+
+  function applyButtonColor(hex) {
+    setCSSVar('--btn-color', hex || getColor(0));
+  }
+
+  // ── Full render ──
+  function loadAndRender() {
+    try {
+      const saved = localStorage.getItem('brandGuideData');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        Object.assign(state, parsed);
+      }
+    } catch(e) {}
+
+    applyBrandName(state.brandName);
+    applyTagline(state.tagline);
+    applyColors(state.colors);
+    applyFonts(state.primaryFont, state.secondaryFont);
+    applyLogo();
+    applyImages(state.images || {});
+    applyBorderRadius(state.borderRadius || '6');
+    applyColoredSections(state.coloredSections);
+    applyCapitalizeHeadings(state.capitalizeHeadings);
+    applyButtonColor(state.buttonColor);
+    applyBgOverrides();
+    applyTextOverrides();
+
+    initEditPanel();
+    initBgEditing();
+  }
+
+  // ── Edit Panel ──
+  function initEditPanel() {
+    // Brand name / tagline
+    const sbBrandName = document.getElementById('sbBrandName');
+    const sbTagline = document.getElementById('sbTagline');
+    sbBrandName.value = state.brandName || '';
+    sbTagline.value = state.tagline || '';
+
+    sbBrandName.addEventListener('input', function() {
+      state.brandName = this.value;
+      applyBrandName(this.value);
+      applyLogo(); // re-render initials if no logo
+      saveState();
+    });
+
+    sbTagline.addEventListener('input', function() {
+      state.tagline = this.value;
+      applyTagline(this.value);
+      renderAppCards();
+      saveState();
+    });
+
+    // Fonts
+    document.getElementById('sbPrimaryFont').value = state.primaryFont;
+    document.getElementById('sbSecondaryFont').value = state.secondaryFont;
+
+    function onSbFontChange() {
+      state.primaryFont = document.getElementById('sbPrimaryFont').value;
+      state.secondaryFont = document.getElementById('sbSecondaryFont').value;
+      applyFonts(state.primaryFont, state.secondaryFont);
+      saveState();
+    }
+    window.onSbFontChange = onSbFontChange;
+
+    // Border radius
+    const br = state.borderRadius || '6';
+    const sbBtns = document.querySelectorAll('.sb-radius-btn');
+    let matched = false;
+    sbBtns.forEach(btn => {
+      if (btn.dataset.value === br) { btn.classList.add('active'); matched = true; }
+      else btn.classList.remove('active');
+    });
+    if (!matched) {
+      document.querySelector('.sb-radius-btn[data-value="custom"]').classList.add('active');
+      document.getElementById('sbRadiusCustom').classList.add('visible');
+      document.getElementById('sbRadiusInput').value = br;
+    }
+
+    document.getElementById('sbRadiusInput').addEventListener('input', function() {
+      state.borderRadius = this.value;
+      applyBorderRadius(this.value);
+      saveState();
+    });
+
+    // Colored sections toggle
+    document.getElementById('sbColoredSections').addEventListener('change', function() {
+      state.coloredSections = this.checked;
+      applyColoredSections(this.checked);
+      saveState();
+    });
+
+    // Capitalize headings toggle
+    document.getElementById('sbCapitalizeHeadings').addEventListener('change', function() {
+      state.capitalizeHeadings = this.checked;
+      applyCapitalizeHeadings(this.checked);
+      saveState();
+    });
+
+    // Button color custom picker
+    document.getElementById('sbBtnColorPicker').addEventListener('input', function() {
+      state.buttonColor = this.value;
+      applyButtonColor(this.value);
+      const swatches = document.querySelectorAll('.sb-btn-palette-swatch');
+      swatches.forEach(s => s.classList.remove('active'));
+      saveState();
+    });
+
+    // Logo uploads (sidebar)
+    document.getElementById('sbSvgInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(ev.target.result)));
+        state.logoSvg = `data:image/svg+xml;base64,${base64}`;
+        document.getElementById('sbSvgThumb').src = state.logoSvg;
+        document.getElementById('sbSvgName').textContent = file.name;
+        document.getElementById('sbSvgContent').style.display = 'none';
+        document.getElementById('sbSvgPreview').classList.add('visible');
+        applyLogo();
+        saveState();
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    document.getElementById('sbPngInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 1200, 0.85, function(dataUrl) {
+        state.logoPng = dataUrl;
+        document.getElementById('sbPngThumb').src = dataUrl;
+        document.getElementById('sbPngName').textContent = file.name;
+        document.getElementById('sbPngContent').style.display = 'none';
+        document.getElementById('sbPngPreview').classList.add('visible');
+        applyLogo();
+        saveState();
+      });
+    });
+
+    // Logo variant uploads helper
+    function handleSbLogoVariant(inputId, stateKey, thumbId, nameId, contentId, previewId) {
+      document.getElementById(inputId).addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
+          const reader = new FileReader();
+          reader.onload = function(ev) {
+            const base64 = btoa(String.fromCharCode(...new Uint8Array(ev.target.result)));
+            state[stateKey] = `data:image/svg+xml;base64,${base64}`;
+            document.getElementById(thumbId).src = state[stateKey];
+            document.getElementById(nameId).textContent = file.name;
+            document.getElementById(contentId).style.display = 'none';
+            document.getElementById(previewId).classList.add('visible');
+            applyLogo();
+            saveState();
+          };
+          reader.readAsArrayBuffer(file);
+        } else {
+          compressImage(file, 1200, 0.85, function(dataUrl) {
+            state[stateKey] = dataUrl;
+            document.getElementById(thumbId).src = dataUrl;
+            document.getElementById(nameId).textContent = file.name;
+            document.getElementById(contentId).style.display = 'none';
+            document.getElementById(previewId).classList.add('visible');
+            applyLogo();
+            saveState();
+          });
+        }
+      });
+    }
+
+    handleSbLogoVariant('sbLogoDarkInput', 'logoDark', 'sbLogoDarkThumb', 'sbLogoDarkName', 'sbLogoDarkContent', 'sbLogoDarkPreview');
+    handleSbLogoVariant('sbLogoLightInput', 'logoLight', 'sbLogoLightThumb', 'sbLogoLightName', 'sbLogoLightContent', 'sbLogoLightPreview');
+    handleSbLogoVariant('sbLogoIconInput', 'logoIcon', 'sbLogoIconThumb', 'sbLogoIconName', 'sbLogoIconContent', 'sbLogoIconPreview');
+
+    // Set logo sidebar preview if exists
+    if (state.logoSvg) {
+      document.getElementById('sbSvgThumb').src = state.logoSvg;
+      document.getElementById('sbSvgName').textContent = 'logo.svg';
+      document.getElementById('sbSvgContent').style.display = 'none';
+      document.getElementById('sbSvgPreview').classList.add('visible');
+    }
+    if (state.logoPng) {
+      document.getElementById('sbPngThumb').src = state.logoPng;
+      document.getElementById('sbPngName').textContent = 'logo.png';
+      document.getElementById('sbPngContent').style.display = 'none';
+      document.getElementById('sbPngPreview').classList.add('visible');
+    }
+
+    [
+      { key: 'logoDark',  thumb: 'sbLogoDarkThumb',  name: 'sbLogoDarkName',  content: 'sbLogoDarkContent',  prev: 'sbLogoDarkPreview' },
+      { key: 'logoLight', thumb: 'sbLogoLightThumb', name: 'sbLogoLightName', content: 'sbLogoLightContent', prev: 'sbLogoLightPreview' },
+      { key: 'logoIcon',  thumb: 'sbLogoIconThumb',  name: 'sbLogoIconName',  content: 'sbLogoIconContent',  prev: 'sbLogoIconPreview' },
+    ].forEach(s => {
+      if (state[s.key]) {
+        document.getElementById(s.thumb).src = state[s.key];
+        document.getElementById(s.name).textContent = s.key + '.png';
+        document.getElementById(s.content).style.display = 'none';
+        document.getElementById(s.prev).classList.add('visible');
+      }
+    });
+
+    // Image uploads (sidebar)
+    const sbImgSlots = [
+      { input: 'sbHeroInput', prev: 'sbHeroPrev', img: 'sbHeroImg', key: 'hero' },
+      { input: 'sbC1Input', prev: 'sbC1Prev', img: 'sbC1Img', key: 'content1' },
+      { input: 'sbC2Input', prev: 'sbC2Prev', img: 'sbC2Img', key: 'content2' },
+      { input: 'sbC3Input', prev: 'sbC3Prev', img: 'sbC3Img', key: 'content3' },
+      { input: 'sbCard1Input', prev: 'sbCard1Prev', img: 'sbCard1Img', key: 'card1' },
+      { input: 'sbCard2Input', prev: 'sbCard2Prev', img: 'sbCard2Img', key: 'card2' },
+      { input: 'sbCard3Input', prev: 'sbCard3Prev', img: 'sbCard3Img', key: 'card3' },
+    ];
+
+    sbImgSlots.forEach(slot => {
+      document.getElementById(slot.input).addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        compressImage(file, 1200, 0.85, function(dataUrl) {
+          if (!state.images) state.images = {};
+          state.images[slot.key] = dataUrl;
+          document.getElementById(slot.img).src = dataUrl;
+          document.getElementById(slot.prev).classList.add('visible');
+          applyImages(state.images);
+          saveState();
+        });
+      });
+    });
+
+    renderSbSwatches();
+
+    // Restore design toggles
+    document.getElementById('sbColoredSections').checked = !!state.coloredSections;
+    document.getElementById('sbCapitalizeHeadings').checked = !!state.capitalizeHeadings;
+    const btnHex = state.buttonColor || getColor(0);
+    document.getElementById('sbBtnColorPicker').value = btnHex;
+    renderSbBtnPalette();
+  }
+
+  // ── Sidebar swatches ──
+  function renderSbSwatches() {
+    const list = document.getElementById('sbSwatchesList');
+    list.innerHTML = '';
+    (state.colors || []).forEach((c, i) => {
+      const row = document.createElement('div');
+      row.className = 'sb-swatch-row';
+      row.innerHTML = `
+        <input type="color" class="sb-swatch-picker" value="${c.hex}" oninput="sbUpdateColor(${i}, this.value)" />
+        <input type="text" class="sb-swatch-name" value="${c.name || ''}" placeholder="Name" oninput="sbUpdateName(${i}, this.value)" />
+        <button class="sb-swatch-remove" onclick="sbRemoveSwatch(${i})">&#x2715;</button>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  function renderSbBtnPalette() {
+    const row = document.getElementById('sbBtnPaletteRow');
+    if (!row) return;
+    row.innerHTML = '';
+    (state.colors || []).forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'sb-btn-palette-swatch';
+      btn.style.background = c.hex;
+      btn.title = c.name || c.hex;
+      const isActive = state.buttonColor === c.hex || (!state.buttonColor && i === 0);
+      if (isActive) btn.classList.add('active');
+      btn.onclick = () => {
+        state.buttonColor = c.hex;
+        applyButtonColor(c.hex);
+        document.getElementById('sbBtnColorPicker').value = c.hex;
+        renderSbBtnPalette();
+        saveState();
+      };
+      row.appendChild(btn);
+    });
+  }
+
+  function sbUpdateColor(i, val) {
+    state.colors[i].hex = val;
+    applyColors(state.colors);
+    renderSbSwatches();
+    saveState();
+  }
+
+  function sbUpdateName(i, val) {
+    state.colors[i].name = val;
+    applyColors(state.colors);
+    saveState();
+  }
+
+  function sbAddSwatch() {
+    const randomHex = '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0');
+    state.colors.push({ hex: randomHex, name: 'New Color' });
+    applyColors(state.colors);
+    renderSbSwatches();
+    saveState();
+  }
+
+  function sbRemoveSwatch(i) {
+    if (state.colors.length <= 1) return;
+    state.colors.splice(i, 1);
+    applyColors(state.colors);
+    renderSbSwatches();
+    saveState();
+  }
+
+  function sbRemoveLogo(e, type) {
+    e.stopPropagation();
+    const map = {
+      svg:       { stateKey: 'logoSvg',   input: 'sbSvgInput',       thumb: 'sbSvgThumb',       name: 'sbSvgName',       prev: 'sbSvgPreview',       content: 'sbSvgContent' },
+      png:       { stateKey: 'logoPng',   input: 'sbPngInput',       thumb: 'sbPngThumb',       name: 'sbPngName',       prev: 'sbPngPreview',       content: 'sbPngContent' },
+      logoDark:  { stateKey: 'logoDark',  input: 'sbLogoDarkInput',  thumb: 'sbLogoDarkThumb',  name: 'sbLogoDarkName',  prev: 'sbLogoDarkPreview',  content: 'sbLogoDarkContent' },
+      logoLight: { stateKey: 'logoLight', input: 'sbLogoLightInput', thumb: 'sbLogoLightThumb', name: 'sbLogoLightName', prev: 'sbLogoLightPreview', content: 'sbLogoLightContent' },
+      logoIcon:  { stateKey: 'logoIcon',  input: 'sbLogoIconInput',  thumb: 'sbLogoIconThumb',  name: 'sbLogoIconName',  prev: 'sbLogoIconPreview',  content: 'sbLogoIconContent' },
+    };
+    const m = map[type];
+    if (!m) return;
+    state[m.stateKey] = null;
+    document.getElementById(m.input).value = '';
+    document.getElementById(m.thumb).src = '';
+    document.getElementById(m.name).textContent = '';
+    document.getElementById(m.prev).classList.remove('visible');
+    document.getElementById(m.content).style.display = '';
+    applyLogo();
+    saveState();
+  }
+
+  function sbRemoveImage(e, key) {
+    e.stopPropagation();
+    if (!state.images) return;
+    state.images[key] = null;
+    const keyMap = {
+      hero: 'sbHero', content1: 'sbC1', content2: 'sbC2', content3: 'sbC3',
+      card1: 'sbCard1', card2: 'sbCard2', card3: 'sbCard3'
+    };
+    const prefix = keyMap[key];
+    if (prefix) {
+      document.getElementById(prefix + 'Prev').classList.remove('visible');
+      const inp = document.getElementById(prefix + 'Input');
+      if (inp) inp.value = '';
+    }
+    applyImages(state.images);
+    saveState();
+  }
+
+  function sbSelectRadius(el) {
+    document.querySelectorAll('.sb-radius-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    const val = el.dataset.value;
+    const customEl = document.getElementById('sbRadiusCustom');
+    if (val === 'custom') {
+      customEl.classList.add('visible');
+      state.borderRadius = document.getElementById('sbRadiusInput').value || '12';
+    } else {
+      customEl.classList.remove('visible');
+      state.borderRadius = val;
+    }
+    applyBorderRadius(state.borderRadius);
+    saveState();
+  }
+
+  // ── Image compression ──
+  function compressImage(file, maxSize, quality, callback) {
+    if (file.type === 'image/svg+xml') {
+      const reader = new FileReader();
+      reader.onload = e => callback(e.target.result);
+      reader.readAsDataURL(file);
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = function() {
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      callback(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = url;
+  }
+
+  // ── Export ──
+  function exportPDF() {
+    const raw = localStorage.getItem('brandGuideData');
+    const data = raw ? JSON.parse(raw) : {};
+    const name = (data.brandName || 'brand-guide').toLowerCase().replace(/\s+/g, '-');
+
+    const btn = document.querySelector('.export-btn');
+    btn.textContent = 'Generating…';
+    btn.disabled = true;
+
+    const guide = document.querySelector('.brand-guide');
+    const sidebar = document.querySelector('.sidebar');
+    const pageWrap = guide.querySelector('.page-wrap');
+
+    // Snapshot original inline styles so we can restore them
+    const snap = {
+      guideML: guide.style.marginLeft,
+      guideW:  guide.style.width,
+      sbDisplay: sidebar.style.display,
+      pwMaxW: pageWrap ? pageWrap.style.maxWidth : null,
+      pwMargin: pageWrap ? pageWrap.style.margin : null
+    };
+
+    // Flatten layout for capture — browser won't repaint until after html2canvas
+    // reads the DOM (which happens inside a rAF), so no visible flash occurs.
+    guide.style.marginLeft = '0';
+    guide.style.width = '1080px';
+    sidebar.style.display = 'none';
+    if (pageWrap) { pageWrap.style.maxWidth = '100%'; pageWrap.style.margin = '0'; }
+
+    const restore = () => {
+      guide.style.marginLeft = snap.guideML;
+      guide.style.width = snap.guideW;
+      sidebar.style.display = snap.sbDisplay;
+      if (pageWrap) { pageWrap.style.maxWidth = snap.pwMaxW; pageWrap.style.margin = snap.pwMargin; }
+    };
+
+    // Wait one rAF so the DOM is settled, then capture
+    requestAnimationFrame(() => {
+      const contentHeight = guide.scrollHeight;
+
+      const opt = {
+        margin: 0,
+        filename: `${name}-brand-guidelines.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: 1080,
+          height: contentHeight,
+          scrollX: 0,
+          scrollY: 0
+        },
+        jsPDF: { unit: 'px', format: [1080, contentHeight], orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'avoid-all'] }
+      };
+
+      html2pdf().set(opt).from(guide).save().then(() => {
+        restore();
+        btn.textContent = 'Export PDF';
+        btn.disabled = false;
+      }).catch(() => {
+        restore();
+        btn.textContent = 'Export PDF';
+        btn.disabled = false;
+      });
+    });
+  }
+
+  function exportMarkdown() {
+    const raw = localStorage.getItem('brandGuideData');
+    const data = raw ? JSON.parse(raw) : {};
+    const name = data.brandName || 'Brand';
+    const tagline = data.tagline || '';
+    const primary = data.primaryFont || 'Playfair Display';
+    const secondary = data.secondaryFont || 'DM Sans';
+    const colors = Array.isArray(data.colors) ? data.colors : [];
+    const radius = data.borderRadius != null ? data.borderRadius : '4';
+
+    let radiusNote = '';
+    if (Number(radius) === 0) radiusNote = 'Sharp edges (0px) — no rounding on any element.';
+    else if (Number(radius) <= 6) radiusNote = `Subtle rounding (${radius}px) — apply to buttons, inputs, and cards.`;
+    else radiusNote = `Rounded (${radius}px) — apply consistently to interactive elements.`;
+
+    const colorRows = colors.map(c =>
+      `| ${c.name || 'Unnamed'} | \`${c.hex}\` |`
+    ).join('\n');
+
+    const md = `# ${name} — Brand Guidelines
+
+> ${tagline}
+
+---
+
+## Typography
+
+| Role | Font |
+|------|------|
+| Primary (headings) | ${primary} |
+| Secondary (body) | ${secondary} |
+
+- **Primary font** is used for all headlines, display text, and brand statements.
+- **Secondary font** is used for body copy, UI labels, captions, and supporting text.
+- Never mix more than two typefaces in a single layout.
+
+---
+
+## Color Palette
+
+| Name | Hex |
+|------|-----|
+${colorRows}
+
+- Use the first color as the primary brand color for backgrounds, CTAs, and dominant UI surfaces.
+- Use lighter palette colors for backgrounds and secondary surfaces.
+- Maintain sufficient contrast (minimum 4.5:1) for all text on colored backgrounds.
+
+---
+
+## Border Radius
+
+${radiusNote}
+
+---
+
+## Visual Rules
+
+### Edges & Corners
+Apply a consistent corner radius on interactive elements (buttons, inputs, cards). Avoid overly rounded or pill shapes — they conflict with the brand's structured, confident tone.
+
+- **Do:** Use \`${radius}px\` radius on buttons, cards, and form inputs.
+- **Don't:** Use pill-shaped buttons (\`border-radius: 9999px\`) or inconsistent radii across components.
+
+### Borders vs. Shadows
+Use thin 1px borders to separate surfaces. Reserve drop shadows for overlays and modals only.
+
+- **Do:** \`border: 1px solid rgba(0,0,0,0.12)\` for card separation.
+- **Don't:** Apply \`box-shadow\` to regular cards or content sections.
+
+### Spacing & Breathing Room
+Generous whitespace is a core part of the brand's feel. Err on the side of more space between sections and components.
+
+- **Do:** Use 24px+ gaps between elements. 80px+ vertical padding on sections.
+- **Don't:** Crowd elements together with tight margins or small gaps.
+
+### Dividers & Separators
+When separating content, use a hairline (1px at low opacity) or whitespace alone.
+
+- **Do:** \`border-top: 1px solid rgba(0,0,0,0.10)\`
+- **Don't:** Use thick rules, colored dividers, or decorative ornaments.
+
+### Color on Surfaces
+Use brand colors as large background blocks — not as scattered accents or small decorative fills.
+
+- **Do:** Full-bleed colored sections with light surfaces below.
+- **Don't:** Sprinkle the primary color as small icons, bullets, or text highlights.
+
+---
+
+## Logo Usage
+
+- Primary format: **SVG** (scalable, preferred for all digital and print use).
+- Fallback: **PNG** with transparency.
+- On dark/colored backgrounds, use the white version of the logo.
+- Maintain adequate clear space around the logo — at minimum the height of the logo's cap-height on all sides.
+- Never distort, recolor, or add effects to the logo.
+
+---
+
+*Generated by ${name} Brand Guide Generator.*
+`;
+
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name.toLowerCase().replace(/\s+/g, '-')}-brand-guidelines.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Background override ──
+  function applyBgOverrides() {
+    if (!state.bgOverrides) return;
+    Object.entries(state.bgOverrides).forEach(([key, color]) => {
+      const el = document.querySelector(`[data-bg-editable="${key}"]`);
+      if (el) { el.style.background = color; el.style.backgroundImage = 'none'; }
+    });
+  }
+
+  function applyBgOverride(el, color) {
+    el.style.background = color;
+    el.style.backgroundImage = 'none';
+    const key = el.dataset.bgEditable;
+    if (!state.bgOverrides) state.bgOverrides = {};
+    state.bgOverrides[key] = color;
+    saveState();
+  }
+
+  function applyTextOverrides() {
+    if (!state.textOverrides) return;
+    Object.entries(state.textOverrides).forEach(([key, color]) => {
+      const el = document.querySelector(`[data-bg-editable="${key}"]`);
+      if (el) { el.style.color = color; el.classList.add('text-override'); }
+    });
+  }
+
+  function applyTextOverride(el, color) {
+    el.style.color = color;
+    el.classList.add('text-override');
+    const key = el.dataset.bgEditable;
+    if (!state.textOverrides) state.textOverrides = {};
+    state.textOverrides[key] = color;
+    saveState();
+  }
+
+  function initBgEditing() {
+    // Create shared popup
+    let popup = document.getElementById('bgPalettePopup');
+    if (!popup) {
+      popup = document.createElement('div');
+      popup.id = 'bgPalettePopup';
+      popup.innerHTML = `
+        <div class="bg-palette-popup__label">Background</div>
+        <div class="bg-palette-popup__swatches" id="bgPaletteSwatches"></div>
+        <div class="bg-palette-popup__divider"></div>
+        <div class="bg-palette-popup__label">Text</div>
+        <div class="bg-palette-popup__swatches" id="textPaletteSwatches"></div>
+      `;
+      document.body.appendChild(popup);
+    }
+
+    let hideTimer = null;
+
+    function makeSwatchRow(containerId, onPick) {
+      const swatchesEl = document.getElementById(containerId);
+      swatchesEl.innerHTML = '';
+      const extras = [{ hex: '#ffffff', name: 'White' }, { hex: '#000000', name: 'Black' }];
+      const allColors = [...(state.colors || []), ...extras];
+      allColors.forEach(c => {
+        const s = document.createElement('div');
+        s.className = 'bg-palette-popup__swatch';
+        s.style.background = c.hex;
+        if (c.hex === '#ffffff') s.style.boxShadow = '0 0 0 1.5px rgba(255,255,255,0.3) inset, 0 1px 4px rgba(0,0,0,0.3)';
+        s.title = c.name || c.hex;
+        s.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onPick(c.hex);
+          clearTimeout(hideTimer);
+          popup.classList.remove('visible');
+        });
+        swatchesEl.appendChild(s);
+      });
+    }
+
+    function buildSwatches(el) {
+      // Detect if element has an image background (inline style set by JS)
+      const bgImg = el.style.backgroundImage;
+      const hasImageBg = bgImg && bgImg !== 'none' && bgImg !== '';
+
+      const bgLabel = popup.querySelector('.bg-palette-popup__label');
+      const bgSwatches = document.getElementById('bgPaletteSwatches');
+      const divider = popup.querySelector('.bg-palette-popup__divider');
+
+      if (hasImageBg) {
+        // Hide bg row for image containers
+        bgLabel.style.display = 'none';
+        bgSwatches.style.display = 'none';
+        divider.style.display = 'none';
+      } else {
+        bgLabel.style.display = '';
+        bgSwatches.style.display = '';
+        divider.style.display = '';
+        makeSwatchRow('bgPaletteSwatches', (hex) => applyBgOverride(el, hex));
+      }
+      makeSwatchRow('textPaletteSwatches', (hex) => applyTextOverride(el, hex));
+    }
+
+    function showPopup(el) {
+      clearTimeout(hideTimer);
+      buildSwatches(el);
+      popup.classList.add('visible');
+      const rect = el.getBoundingClientRect();
+      popup.style.left = '0';
+      popup.style.top = '0';
+      const pw = popup.offsetWidth;
+      const ph = popup.offsetHeight;
+      let left = rect.left + 8;
+      let top = rect.top + 8;
+      if (left + pw > window.innerWidth - 8) left = rect.right - pw - 8;
+      if (top + ph > window.innerHeight - 8) top = rect.bottom - ph - 8;
+      popup.style.left = left + 'px';
+      popup.style.top = top + 'px';
+    }
+
+    popup.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+    popup.addEventListener('mouseleave', () => { popup.classList.remove('visible'); });
+
+    // Attach to all bg-editable elements (use flag to avoid duplicates)
+    document.querySelectorAll('[data-bg-editable]').forEach(el => {
+      if (el.dataset.bgEditInit) return;
+      el.dataset.bgEditInit = '1';
+      el.addEventListener('mouseenter', () => showPopup(el));
+      el.addEventListener('mouseleave', () => {
+        hideTimer = setTimeout(() => popup.classList.remove('visible'), 250);
+      });
+    });
+  }
+
+  // ── Back to form: confirm reset ──
+  document.getElementById('backToFormLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    const confirmed = confirm('Go back to the form?\n\nThis will reset all your brand guide settings so you can start fresh.');
+    if (confirmed) {
+      localStorage.removeItem('brandGuideData');
+      window.location.href = this.href;
+    }
+  });
+
+  // ── Init ──
+  loadAndRender();
+</script>
+</body>
+</html>
