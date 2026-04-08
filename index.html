@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Brand Guide Generator</title>
+  <title>SAS Brand Guide Gen</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -11,14 +11,19 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --green: #1E3D2F;
-      --green-dk: #0D2018;
-      --bg: #f8f7f4;
-      --white: #ffffff;
-      --border: #e8e4dc;
-      --ink: #1a1a1a;
-      --ink-muted: #6b6b6b;
+      --accent: #06ccff;
+      --accent-dk: #04a3cc;
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface-2: #1e1e1e;
+      --border: #2a2a2a;
+      --ink: #f0f0f0;
+      --ink-muted: #888888;
       --radius: 8px;
+      /* legacy aliases */
+      --green: var(--accent);
+      --green-dk: var(--accent-dk);
+      --white: var(--surface);
     }
 
     html { font-size: 16px; }
@@ -31,20 +36,28 @@
 
     /* Header */
     .app-header {
-      background: var(--green);
-      color: white;
+      background: #0a0a0a;
+      border-bottom: 1px solid var(--border);
+      color: var(--ink);
       padding: 0 24px;
       height: 56px;
       display: flex;
       align-items: center;
+      gap: 12px;
       position: sticky;
       top: 0;
       z-index: 100;
+    }
+    .app-header__logo {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
     }
     .app-header__title {
       font-size: 15px;
       font-weight: 600;
       letter-spacing: 0.02em;
+      color: var(--ink);
     }
 
     /* Main content */
@@ -68,7 +81,7 @@
 
     /* Section cards */
     .form-section {
-      background: var(--white);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 28px 32px;
@@ -85,8 +98,8 @@
     .section-badge {
       width: 28px;
       height: 28px;
-      background: var(--green);
-      color: white;
+      background: var(--accent);
+      color: #000;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -129,11 +142,11 @@
       font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 14px;
       color: var(--ink);
-      background: var(--white);
+      background: var(--surface-2);
       outline: none;
       transition: border-color 0.15s;
     }
-    .field-input:focus { border-color: var(--green); }
+    .field-input:focus { border-color: var(--accent); }
     .field-input.error { border-color: #c0392b; }
 
     .field-error {
@@ -147,7 +160,7 @@
     select.field-input {
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b6b6b' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888888' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
       padding-right: 36px;
@@ -157,7 +170,7 @@
     .font-preview {
       margin-top: 10px;
       padding: 14px 16px;
-      background: var(--bg);
+      background: var(--surface-2);
       border-radius: 5px;
       font-size: 22px;
       color: var(--ink);
@@ -183,8 +196,8 @@
       position: relative;
     }
     .upload-zone:hover, .upload-zone.drag-over {
-      border-color: var(--green);
-      background: rgba(30,61,47,0.03);
+      border-color: var(--accent);
+      background: rgba(6,204,255,0.04);
     }
     .upload-zone--primary { margin-bottom: 16px; }
     .upload-zone--secondary {
@@ -221,9 +234,9 @@
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--ink-muted);
-      background: var(--bg);
-      border: 1px solid var(--border);
+      color: var(--accent);
+      background: rgba(6,204,255,0.08);
+      border: 1px solid rgba(6,204,255,0.2);
       border-radius: 3px;
       padding: 2px 6px;
       margin-bottom: 8px;
@@ -249,7 +262,7 @@
       height: 56px;
       object-fit: contain;
       border-radius: 4px;
-      background: var(--bg);
+      background: var(--surface-2);
     }
     .upload-preview__info { flex: 1; text-align: left; }
     .upload-preview__name {
@@ -334,10 +347,11 @@
       font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 13px;
       color: var(--ink);
+      background: var(--surface-2);
       outline: none;
       transition: border-color 0.15s;
     }
-    .swatch-name:focus { border-color: var(--green); }
+    .swatch-name:focus { border-color: var(--accent); }
 
     .swatch-remove {
       background: none;
@@ -350,24 +364,24 @@
       transition: color 0.15s;
       flex-shrink: 0;
     }
-    .swatch-remove:hover { color: #c0392b; }
+    .swatch-remove:hover { color: #ff4d6d; }
 
     .add-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       padding: 8px 16px;
-      border: 1.5px solid var(--green);
+      border: 1.5px solid var(--accent);
       border-radius: 5px;
       background: none;
-      color: var(--green);
+      color: var(--accent);
       font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
     }
-    .add-btn:hover { background: var(--green); color: white; }
+    .add-btn:hover { background: var(--accent); color: #000; }
 
     /* Image upload grid */
     .images-grid {
@@ -395,8 +409,8 @@
       position: relative;
     }
     .image-upload-zone:hover, .image-upload-zone.drag-over {
-      border-color: var(--green);
-      background: rgba(30,61,47,0.03);
+      border-color: var(--accent);
+      background: rgba(6,204,255,0.04);
     }
 
     .image-upload-zone .upload-icon {
@@ -468,17 +482,17 @@
       text-align: center;
       cursor: pointer;
       transition: border-color 0.15s, background 0.15s;
-      background: var(--white);
+      background: var(--surface-2);
     }
     .radius-preset.active {
-      border-color: var(--green);
-      background: rgba(30,61,47,0.04);
+      border-color: var(--accent);
+      background: rgba(6,204,255,0.06);
     }
 
     .radius-demo-box {
       width: 40px;
       height: 40px;
-      background: var(--green);
+      background: var(--accent);
       margin: 0 auto 10px;
       opacity: 0.7;
     }
@@ -509,9 +523,10 @@
       font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 14px;
       color: var(--ink);
+      background: var(--surface-2);
       outline: none;
     }
-    .radius-custom-input:focus { border-color: var(--green); }
+    .radius-custom-input:focus { border-color: var(--accent); }
     .radius-unit {
       font-size: 14px;
       color: var(--ink-muted);
@@ -523,7 +538,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(to top, var(--bg) 70%, transparent);
+      background: linear-gradient(to top, #0d0d0d 70%, transparent);
       padding: 20px 24px 28px;
       z-index: 50;
     }
@@ -536,8 +551,8 @@
     .generate-btn {
       width: 100%;
       padding: 15px 24px;
-      background: var(--green);
-      color: white;
+      background: var(--accent);
+      color: #000;
       border: none;
       border-radius: 7px;
       font-family: 'DM Sans', system-ui, sans-serif;
@@ -547,7 +562,7 @@
       letter-spacing: 0.02em;
       transition: background 0.15s, transform 0.1s;
     }
-    .generate-btn:hover { background: #163326; }
+    .generate-btn:hover { background: var(--accent-dk); }
     .generate-btn:active { transform: scale(0.99); }
 
     @keyframes shake {
@@ -577,7 +592,8 @@
 <body>
 
 <header class="app-header">
-  <span class="app-header__title">Brand Guide Generator</span>
+  <img class="app-header__logo" src="sas-logo.svg" alt="SAS" />
+  <span class="app-header__title">SAS Brand Guide Gen</span>
 </header>
 
 <main class="main">
