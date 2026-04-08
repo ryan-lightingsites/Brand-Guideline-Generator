@@ -1264,7 +1264,7 @@
     swatchPickers = [];
   }
 
-  function initSwatchPicker(el, colorIndex) {
+  function initSwatchPicker(el, colorIndex, hexSpan) {
     const p = Pickr.create({
       el,
       theme: 'nano',
@@ -1279,8 +1279,7 @@
     p.on('change', color => {
       const hex = color.toHEXA().toString();
       data.colors[colorIndex].hex = hex;
-      const row = el.closest ? el.closest('.swatch-row') : el.parentElement;
-      if (row) row.querySelector('.swatch-hex').textContent = hex;
+      if (hexSpan) hexSpan.textContent = hex;
       renderBtnColorSwatches();
     });
     swatchPickers.push(p);
@@ -1310,7 +1309,7 @@
           <span style="width:28px;flex-shrink:0;"></span>
         `;
         group.appendChild(row);
-        initSwatchPicker(row.querySelector('.swatch-picker'), i);
+        initSwatchPicker(row.querySelector('.swatch-picker'), i, row.querySelector('.swatch-hex'));
       });
     });
 
@@ -1332,7 +1331,7 @@
           <button class="swatch-remove" onclick="removeSwatch(${i})" title="Remove color">&#x2715;</button>
         `;
         group.appendChild(row);
-        initSwatchPicker(row.querySelector('.swatch-picker'), i);
+        initSwatchPicker(row.querySelector('.swatch-picker'), i, row.querySelector('.swatch-hex'));
       });
     }
   }
