@@ -18,6 +18,7 @@
       --brand-light: #FAF7F2;
       --brand-dark: #0D2018;
       --brand-radius: 4px;
+      --brand-border-color: rgba(30,61,47,0.18);
       --font-primary: 'Playfair Display', Georgia, serif;
       --font-secondary: 'DM Sans', system-ui, sans-serif;
 
@@ -1323,6 +1324,24 @@
             <span class="sb-toggle-track"></span>
           </label>
         </div>
+        <div style="margin-top:12px;">
+          <span class="sb-label" style="margin-bottom:6px;display:block;">Card Separation</span>
+          <div style="display:flex;gap:6px;">
+            <button type="button" id="sbSepBorder" onclick="state.separationStyle='border'; applySeparationStyle('border'); saveState();"
+              style="flex:1;padding:7px 6px;border:1.5px solid var(--ui-accent);border-radius:4px;background:rgba(6,204,255,0.08);font-size:12px;font-weight:600;color:var(--ui-ink);cursor:pointer;">Border</button>
+            <button type="button" id="sbSepShadow" onclick="state.separationStyle='shadow'; applySeparationStyle('shadow'); saveState();"
+              style="flex:1;padding:7px 6px;border:1.5px solid var(--ui-border);border-radius:4px;background:var(--ui-surface-2);font-size:12px;font-weight:500;color:var(--ui-ink-muted);cursor:pointer;">Shadow</button>
+          </div>
+        </div>
+        <div style="margin-top:10px;" id="sbBorderOpacityWrap">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span class="sb-label" style="margin-bottom:0;">Border Opacity</span>
+            <span id="sbBorderOpacityVal" style="font-size:12px;color:var(--ui-ink-muted);font-weight:500;">18%</span>
+          </div>
+          <input type="range" id="sbBorderOpacity" min="5" max="50" step="1" value="18"
+            style="width:100%;accent-color:var(--ui-accent);"
+            oninput="state.borderOpacity=+this.value; document.getElementById('sbBorderOpacityVal').textContent=this.value+'%'; applyBorderOpacity(this.value); saveState();" />
+        </div>
         <label class="sb-label" style="margin-top:4px;margin-bottom:6px;">Button Color</label>
         <div class="sb-btn-palette-row" id="sbBtnPaletteRow"></div>
         <input type="color" id="sbBtnColorPicker" class="sb-swatch-picker" title="Custom button color" />
@@ -1474,37 +1493,19 @@
       <div class="rule-row">
         <div class="rule-meta">
           <p class="rule-title">Borders vs. shadows</p>
-          <p class="rule-desc">Use thin 1px borders to separate surfaces. Reserve drop shadows for overlays and modals only — never use them to elevate cards or sections. Flat, bordered layouts feel more refined for this brand.</p>
-          <span class="rule-verdict rule-verdict--do">Use: borders for separation</span>
+          <p class="rule-desc" id="sepRuleDesc">Use thin 1px borders to separate surfaces. Reserve drop shadows for overlays and modals only — never use them to elevate cards or sections. Flat, bordered layouts feel more refined for this brand.</p>
+          <span class="rule-verdict rule-verdict--do" id="sepRuleVerdict">Use: borders for separation</span>
         </div>
         <div class="rule-examples">
           <div class="rule-example">
             <span class="rule-example__label do-label">Do</span>
-            <div class="rule-example__demo" style="flex-direction:column;gap:8px;">
-              <div style="width:100%;background:var(--white);border:1px solid rgba(30,61,47,.18);border-radius:4px;padding:16px;">
-                <div style="width:60%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
-                <div style="width:90%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
-              </div>
-              <div style="width:100%;background:var(--white);border:1px solid rgba(30,61,47,.18);border-radius:4px;padding:16px;">
-                <div style="width:40%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
-                <div style="width:75%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
-              </div>
-            </div>
-            <p class="rule-example__note">1px border at ~18% opacity. Clean and flat.</p>
+            <div class="rule-example__demo" id="sepDoDemo" style="flex-direction:column;gap:8px;"></div>
+            <p class="rule-example__note" id="sepDoNote"></p>
           </div>
           <div class="rule-example rule-example--dont">
             <span class="rule-example__label dont-label">Don't</span>
-            <div class="rule-example__demo" style="flex-direction:column;gap:8px;">
-              <div style="width:100%;background:var(--white);box-shadow:0 8px 24px rgba(0,0,0,.15);border-radius:4px;padding:16px;">
-                <div style="width:60%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
-                <div style="width:90%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
-              </div>
-              <div style="width:100%;background:var(--white);box-shadow:0 8px 24px rgba(0,0,0,.15);border-radius:4px;padding:16px;">
-                <div style="width:40%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
-                <div style="width:75%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
-              </div>
-            </div>
-            <p class="rule-example__note">Heavy drop shadows on cards feel too generic and soft.</p>
+            <div class="rule-example__demo" id="sepDontDemo" style="flex-direction:column;gap:8px;"></div>
+            <p class="rule-example__note" id="sepDontNote"></p>
           </div>
         </div>
       </div>
@@ -1650,6 +1651,8 @@
       { hex: '#0D2018', name: 'Midnight' }
     ],
     borderRadius: '6',
+    separationStyle: 'border',
+    borderOpacity: 18,
     coloredSections: false,
     capitalizeHeadings: false,
     buttonColor: null,
@@ -1673,6 +1676,83 @@
 
   function setCSSVar(name, value) {
     document.documentElement.style.setProperty(name, value);
+  }
+
+  function hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0,2), 16);
+    const g = parseInt(h.substring(2,4), 16);
+    const b = parseInt(h.substring(4,6), 16);
+    return `${r},${g},${b}`;
+  }
+
+  function applyBorderOpacity(opacity) {
+    const pct = parseFloat(opacity) / 100;
+    const primaryHex = (state.colors && state.colors[0]) ? state.colors[0].hex : '#1E3D2F';
+    const rgb = hexToRgb(primaryHex);
+    setCSSVar('--brand-border-color', `rgba(${rgb},${pct.toFixed(2)})`);
+
+    if ((state.separationStyle || 'border') === 'border') {
+      const note = document.getElementById('sepDoNote');
+      if (note) note.textContent = `1px border at ~${Math.round(pct * 100)}% opacity. Clean and flat.`;
+    }
+  }
+
+  const BORDER_CARD = `
+    <div style="width:100%;background:var(--white);border:1px solid var(--brand-border-color);border-radius:4px;padding:16px;">
+      <div style="width:60%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
+      <div style="width:90%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+    </div>
+    <div style="width:100%;background:var(--white);border:1px solid var(--brand-border-color);border-radius:4px;padding:16px;">
+      <div style="width:40%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
+      <div style="width:75%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+    </div>`;
+
+  const SHADOW_CARD = `
+    <div style="width:100%;background:var(--white);box-shadow:0 8px 24px rgba(0,0,0,.15);border-radius:4px;padding:16px;">
+      <div style="width:60%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
+      <div style="width:90%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+    </div>
+    <div style="width:100%;background:var(--white);box-shadow:0 8px 24px rgba(0,0,0,.15);border-radius:4px;padding:16px;">
+      <div style="width:40%;height:10px;background:rgba(0,0,0,0.18);border-radius:2px;margin-bottom:8px;"></div>
+      <div style="width:75%;height:8px;background:rgba(0,0,0,0.1);border-radius:2px;"></div>
+    </div>`;
+
+  function applySeparationStyle(style) {
+    const isBorder = style === 'border';
+
+    // Update rule meta
+    document.getElementById('sepRuleDesc').textContent = isBorder
+      ? 'Use thin 1px borders to separate surfaces. Reserve drop shadows for overlays and modals only — never use them to elevate cards or sections. Flat, bordered layouts feel more refined for this brand.'
+      : 'Use drop shadows to lift cards and surfaces off the page. Reserve flat borders for structural dividers only — never use them to elevate cards or panels. Layered, shadowed layouts add depth to this brand.';
+    document.getElementById('sepRuleVerdict').textContent = isBorder
+      ? 'Use: borders for separation'
+      : 'Use: shadows for elevation';
+    document.getElementById('sepRuleVerdict').className = 'rule-verdict rule-verdict--do';
+
+    // Swap Do / Don't examples
+    document.getElementById('sepDoDemo').innerHTML = isBorder ? BORDER_CARD : SHADOW_CARD;
+    document.getElementById('sepDontDemo').innerHTML = isBorder ? SHADOW_CARD : BORDER_CARD;
+    document.getElementById('sepDoNote').textContent = isBorder
+      ? `1px border at ~${state.borderOpacity || 18}% opacity. Clean and flat.`
+      : 'Subtle drop shadow adds depth and lifts cards off the surface.';
+    document.getElementById('sepDontNote').textContent = isBorder
+      ? 'Heavy drop shadows on cards feel too generic and soft.'
+      : 'Flat borders feel rigid and lack depth for this brand.';
+
+    // Show/hide border opacity slider
+    const opacityWrap = document.getElementById('sbBorderOpacityWrap');
+    if (opacityWrap) opacityWrap.style.display = isBorder ? '' : 'none';
+
+    // Sync sidebar toggle buttons
+    const sbBorder = document.getElementById('sbSepBorder');
+    const sbShadow = document.getElementById('sbSepShadow');
+    if (sbBorder && sbShadow) {
+      const active = 'flex:1;padding:7px 6px;border:1.5px solid var(--ui-accent);border-radius:4px;background:rgba(6,204,255,0.08);font-size:12px;font-weight:600;color:var(--ui-ink);cursor:pointer;';
+      const inactive = 'flex:1;padding:7px 6px;border:1.5px solid var(--ui-border);border-radius:4px;background:var(--ui-surface-2);font-size:12px;font-weight:500;color:var(--ui-ink-muted);cursor:pointer;';
+      sbBorder.style.cssText = isBorder ? active : inactive;
+      sbShadow.style.cssText = isBorder ? inactive : active;
+    }
   }
 
   function getInitials(name) {
@@ -1780,6 +1860,7 @@
     setCSSVar('--brand-dark', c3);
 
     // Recalculate derived styles that depend on palette
+    applyBorderOpacity(state.borderOpacity != null ? state.borderOpacity : 18);
     applyColoredSections(state.coloredSections);
     if (!state.buttonColor) applyButtonColor(null);
     renderSbBtnPalette();
@@ -2025,6 +2106,8 @@
     applyLogo();
     applyImages(state.images || {});
     applyBorderRadius(state.borderRadius || '6');
+    applyBorderOpacity(state.borderOpacity != null ? state.borderOpacity : 18);
+    applySeparationStyle(state.separationStyle || 'border');
     applyColoredSections(state.coloredSections);
     applyCapitalizeHeadings(state.capitalizeHeadings);
     applyButtonColor(state.buttonColor);
@@ -2088,6 +2171,11 @@
       applyBorderRadius(this.value);
       saveState();
     });
+
+    // Border opacity
+    const bo = state.borderOpacity != null ? state.borderOpacity : 18;
+    document.getElementById('sbBorderOpacity').value = bo;
+    document.getElementById('sbBorderOpacityVal').textContent = bo + '%';
 
     // Colored sections toggle
     document.getElementById('sbColoredSections').addEventListener('change', function() {
@@ -2470,6 +2558,9 @@
     const secondary = data.secondaryFont || 'DM Sans';
     const colors = Array.isArray(data.colors) ? data.colors : [];
     const radius = data.borderRadius != null ? data.borderRadius : '4';
+    const separationStyle = data.separationStyle || 'border';
+    const borderOpacity = data.borderOpacity != null ? data.borderOpacity : 18;
+    const borderOpacityDec = (borderOpacity / 100).toFixed(2);
 
     let radiusNote = '';
     if (Number(radius) === 0) radiusNote = 'Sharp edges (0px) — no rounding on any element.';
@@ -2526,10 +2617,13 @@ Apply a consistent corner radius on interactive elements (buttons, inputs, cards
 - **Don't:** Use pill-shaped buttons (\`border-radius: 9999px\`) or inconsistent radii across components.
 
 ### Borders vs. Shadows
-Use thin 1px borders to separate surfaces. Reserve drop shadows for overlays and modals only.
+${separationStyle === 'border'
+  ? 'Use thin 1px borders to separate surfaces. Reserve drop shadows for overlays and modals only.'
+  : 'Use drop shadows to lift cards and surfaces off the page. Reserve flat borders for structural dividers only.'}
 
-- **Do:** \`border: 1px solid rgba(0,0,0,0.12)\` for card separation.
-- **Don't:** Apply \`box-shadow\` to regular cards or content sections.
+${separationStyle === 'border'
+  ? `- **Do:** \`border: 1px solid rgba(0,0,0,${borderOpacityDec})\` for card separation (${borderOpacity}% opacity).\n- **Don't:** Apply \`box-shadow\` to regular cards or content sections.`
+  : `- **Do:** \`box-shadow: 0 4px 16px rgba(0,0,0,0.12)\` for card elevation.\n- **Don't:** Use flat 1px borders to separate cards or panels.`}
 
 ### Spacing & Breathing Room
 Generous whitespace is a core part of the brand's feel. Err on the side of more space between sections and components.

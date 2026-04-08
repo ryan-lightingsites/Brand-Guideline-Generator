@@ -1007,6 +1007,28 @@
     </div>
 
     <div style="margin-top:28px;">
+      <label class="field-label" style="margin-bottom:10px;">Card Separation Style</label>
+      <div style="display:flex;gap:8px;" id="separationStyleRow">
+        <button type="button" id="sepBorderBtn" onclick="setSeparationStyle('border')"
+          style="flex:1;padding:10px 8px;border:2px solid var(--accent);border-radius:6px;background:rgba(6,204,255,0.06);font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;">Border</button>
+        <button type="button" id="sepShadowBtn" onclick="setSeparationStyle('shadow')"
+          style="flex:1;padding:10px 8px;border:2px solid var(--border);border-radius:6px;background:var(--surface-2);font-size:13px;font-weight:500;color:var(--ink-muted);cursor:pointer;">Shadow</button>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin:6px 0 0;">Defines your brand's approach to separating cards and surfaces.</p>
+    </div>
+
+    <div style="margin-top:20px;" id="borderOpacityWrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <label class="field-label" style="margin-bottom:0;">Border Opacity</label>
+        <span id="borderOpacityLabel" style="font-size:13px;color:#888;font-weight:500;">18%</span>
+      </div>
+      <input type="range" id="borderOpacityInput" min="5" max="50" step="1" value="18"
+        style="width:100%;accent-color:var(--accent);margin-bottom:4px;"
+        oninput="data.borderOpacity=+this.value; document.getElementById('borderOpacityLabel').textContent=this.value+'%';" />
+      <p style="font-size:12px;color:#aaa;margin:0;">Controls the transparency of 1px separation borders.</p>
+    </div>
+
+    <div style="margin-top:20px;">
       <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
         <span style="font-size:14px;color:var(--ink);">Color section backgrounds</span>
         <input type="checkbox" id="coloredSections" style="width:16px;height:16px;cursor:pointer;" onchange="data.coloredSections = this.checked" />
@@ -1053,6 +1075,8 @@
       { hex: '#0D2018', name: 'Midnight', group: 'neutral', fixed: true },
     ],
     borderRadius: '6',
+    separationStyle: 'border',
+    borderOpacity: 18,
     coloredSections: false,
     capitalizeHeadings: false,
     buttonColor: null,
@@ -1356,6 +1380,25 @@
     data.borderRadius = this.value;
   });
 
+  // ── Separation style ──
+  function setSeparationStyle(style) {
+    data.separationStyle = style;
+    const borderBtn = document.getElementById('sepBorderBtn');
+    const shadowBtn = document.getElementById('sepShadowBtn');
+    const opacityWrap = document.getElementById('borderOpacityWrap');
+    const active = 'border:2px solid var(--accent);border-radius:6px;background:rgba(6,204,255,0.06);font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;flex:1;padding:10px 8px;';
+    const inactive = 'border:2px solid var(--border);border-radius:6px;background:var(--surface-2);font-size:13px;font-weight:500;color:var(--ink-muted);cursor:pointer;flex:1;padding:10px 8px;';
+    if (style === 'border') {
+      borderBtn.style.cssText = active;
+      shadowBtn.style.cssText = inactive;
+      opacityWrap.style.display = '';
+    } else {
+      borderBtn.style.cssText = inactive;
+      shadowBtn.style.cssText = active;
+      opacityWrap.style.display = 'none';
+    }
+  }
+
   // ── Collect data ──
   function collectData() {
     data.brandName = document.getElementById('brandName').value.trim();
@@ -1473,6 +1516,11 @@
           document.getElementById('customRadiusInput').value = br;
         }
 
+        if (data.separationStyle) setSeparationStyle(data.separationStyle);
+        if (data.borderOpacity != null) {
+          document.getElementById('borderOpacityInput').value = data.borderOpacity;
+          document.getElementById('borderOpacityLabel').textContent = data.borderOpacity + '%';
+        }
         if (data.capitalizeHeadings) document.getElementById('capitalizeHeadings').checked = true;
         if (data.coloredSections) document.getElementById('coloredSections').checked = true;
         if (data.buttonColor) {

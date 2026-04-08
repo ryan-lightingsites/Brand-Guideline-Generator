@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(python3 -:*)",
-      "WebFetch(domain:www.npmjs.com)"
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(~/bin/gh auth:*)",
+      "Read(//Users/ryanmarinay/Downloads/**)"
     ]
   }
 }
