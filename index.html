@@ -1277,6 +1277,7 @@
       }
     });
     p.on('change', color => {
+      p.applyColor(true);
       const hex = color.toHEXA().toString();
       data.colors[colorIndex].hex = hex;
       if (hexSpan) hexSpan.textContent = hex;
@@ -1622,6 +1623,7 @@
       }
     });
     btnPickr.on('change', color => {
+      btnPickr.applyColor(true);
       data.buttonColor = color.toHEXA().toString();
       renderBtnColorSwatches();
     });
