@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -323,12 +324,58 @@
     .swatch-picker {
       width: 40px;
       height: 40px;
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 2px;
-      cursor: pointer;
-      background: none;
       flex-shrink: 0;
+    }
+
+    /* ── Pickr overrides: dark theme ── */
+    .pickr { display: flex; align-items: center; }
+    .pickr .pcr-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    .pcr-app {
+      background: #1e1e1e !important;
+      border: 1px solid #333 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+    }
+    .pcr-app .pcr-interaction input {
+      background: #2a2a2a !important;
+      color: #f0f0f0 !important;
+      border: 1px solid #333 !important;
+      border-radius: 5px !important;
+    }
+    .pcr-app .pcr-interaction input:focus { border-color: var(--accent) !important; }
+    .pcr-app .pcr-interaction label {
+      color: #888 !important;
+    }
+    .pcr-app .pcr-interaction .pcr-type.active {
+      color: var(--accent) !important;
+    }
+    .pcr-app .pcr-selection .pcr-picker { border-color: rgba(255,255,255,0.8) !important; }
+    .pcr-app .pcr-selection .pcr-color-opacity .pcr-picker,
+    .pcr-app .pcr-selection .pcr-color-chooser .pcr-picker {
+      border-color: #fff !important;
+    }
+    /* eyedropper / save / cancel buttons */
+    .pcr-app .pcr-interaction .pcr-save,
+    .pcr-app .pcr-interaction .pcr-cancel,
+    .pcr-app .pcr-interaction .pcr-clear {
+      background: var(--surface-2) !important;
+      color: var(--ink) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 5px !important;
+    }
+    .pcr-app .pcr-interaction .pcr-save:hover { border-color: var(--accent) !important; }
+    /* Button color Pickr (larger trigger) */
+    #btnPickrTrigger .pcr-button {
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
+      border: 1px solid #e0ddd8;
     }
 
     .swatch-hex {
@@ -1039,7 +1086,7 @@
       <label class="field-label">Button Color</label>
       <p style="font-size:13px;color:#888;margin-bottom:10px;">Pick from your palette or choose a custom color.</p>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;" id="btnColorRow">
-        <input type="color" id="buttonColorPicker" value="#1E3D2F" style="width:38px;height:38px;border:1px solid #e0ddd8;border-radius:6px;cursor:pointer;padding:2px;" oninput="data.buttonColor = this.value; syncBtnColorSwatches()" />
+        <div id="btnPickrTrigger"></div>
         <span style="font-size:13px;color:#888;">or pick from palette →</span>
         <div style="display:flex;gap:6px;flex-wrap:wrap;" id="btnColorSwatches"></div>
       </div>
@@ -1056,6 +1103,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 <script>
   // ── State ──
   const data = {
@@ -1208,7 +1256,38 @@
     { key: 'neutral', label: 'Neutrals' },
   ];
 
+  let swatchPickers = [];
+  let btnPickr = null;
+
+  function destroySwatchPickers() {
+    swatchPickers.forEach(p => { try { p.destroyAndRemove(); } catch(e) {} });
+    swatchPickers = [];
+  }
+
+  function initSwatchPicker(el, colorIndex) {
+    const p = Pickr.create({
+      el,
+      theme: 'nano',
+      default: data.colors[colorIndex].hex,
+      components: {
+        preview: true,
+        opacity: false,
+        hue: true,
+        interaction: { hex: true, input: true, save: false }
+      }
+    });
+    p.on('change', color => {
+      const hex = color.toHEXA().toString();
+      data.colors[colorIndex].hex = hex;
+      const row = el.closest ? el.closest('.swatch-row') : el.parentElement;
+      if (row) row.querySelector('.swatch-hex').textContent = hex;
+      renderBtnColorSwatches();
+    });
+    swatchPickers.push(p);
+  }
+
   function renderSwatches() {
+    destroySwatchPickers();
     const list = document.getElementById('swatchesList');
     list.innerHTML = '';
 
@@ -1219,19 +1298,20 @@
       const group = document.createElement('div');
       group.className = 'swatch-group';
       group.innerHTML = `<div class="swatch-group-label">${label}</div>`;
+      list.appendChild(group);
       groupColors.forEach(c => {
         const i = data.colors.indexOf(c);
         const row = document.createElement('div');
         row.className = 'swatch-row';
         row.innerHTML = `
-          <input type="color" class="swatch-picker" value="${c.hex}" oninput="updateSwatchColor(${i}, this.value)" />
+          <div class="swatch-picker"></div>
           <span class="swatch-hex">${c.hex}</span>
           <input type="text" class="swatch-name" value="${c.name}" placeholder="Color name" oninput="updateSwatchName(${i}, this.value)" />
           <span style="width:28px;flex-shrink:0;"></span>
         `;
         group.appendChild(row);
+        initSwatchPicker(row.querySelector('.swatch-picker'), i);
       });
-      list.appendChild(group);
     });
 
     // Render custom (deletable) colors
@@ -1240,25 +1320,25 @@
       const group = document.createElement('div');
       group.className = 'swatch-group';
       group.innerHTML = `<div class="swatch-group-label">Additional</div>`;
+      list.appendChild(group);
       customColors.forEach(c => {
         const i = data.colors.indexOf(c);
         const row = document.createElement('div');
         row.className = 'swatch-row';
         row.innerHTML = `
-          <input type="color" class="swatch-picker" value="${c.hex}" oninput="updateSwatchColor(${i}, this.value)" />
+          <div class="swatch-picker"></div>
           <span class="swatch-hex">${c.hex}</span>
           <input type="text" class="swatch-name" value="${c.name}" placeholder="Color name" oninput="updateSwatchName(${i}, this.value)" />
           <button class="swatch-remove" onclick="removeSwatch(${i})" title="Remove color">&#x2715;</button>
         `;
         group.appendChild(row);
+        initSwatchPicker(row.querySelector('.swatch-picker'), i);
       });
-      list.appendChild(group);
     }
   }
 
   function updateSwatchColor(i, val) {
     data.colors[i].hex = val;
-    renderSwatches();
     renderBtnColorSwatches();
   }
 
@@ -1523,14 +1603,31 @@
         }
         if (data.capitalizeHeadings) document.getElementById('capitalizeHeadings').checked = true;
         if (data.coloredSections) document.getElementById('coloredSections').checked = true;
-        if (data.buttonColor) {
-          document.getElementById('buttonColorPicker').value = data.buttonColor;
-        }
+        // buttonColor is restored after btnPickr is initialized below
       }
     } catch(e) {}
 
     // Render swatches
     renderSwatches();
+
+    // Init button color Pickr
+    btnPickr = Pickr.create({
+      el: '#btnPickrTrigger',
+      theme: 'nano',
+      default: data.buttonColor || data.colors[0].hex,
+      components: {
+        preview: true,
+        opacity: false,
+        hue: true,
+        interaction: { hex: true, input: true, save: false }
+      }
+    });
+    btnPickr.on('change', color => {
+      data.buttonColor = color.toHEXA().toString();
+      renderBtnColorSwatches();
+    });
+    data.buttonColor = data.buttonColor || data.colors[0].hex;
+
     renderBtnColorSwatches();
 
     // Load and apply initial fonts
@@ -1551,7 +1648,7 @@
       btn.title = c.name || c.hex;
       btn.onclick = () => {
         data.buttonColor = c.hex;
-        document.getElementById('buttonColorPicker').value = c.hex;
+        if (btnPickr) btnPickr.setColor(c.hex);
         renderBtnColorSwatches();
       };
       row.appendChild(btn);
@@ -1559,6 +1656,7 @@
   }
 
   function syncBtnColorSwatches() {
+    if (btnPickr) data.buttonColor = btnPickr.getColor().toHEXA().toString();
     renderBtnColorSwatches();
   }
 
