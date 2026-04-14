@@ -27,6 +27,12 @@
 
       --page-w: 1080px;
       --section-gap: 80px;
+
+      --btn-color: var(--green);
+      --btn-radius: 8px;
+      --btn-padding: 12px 28px;
+      --btn-font-size: 13px;
+      --btn-font-weight: 500;
     }
 
     /* ─── Base ─── */
@@ -312,18 +318,18 @@
     .btn {
       display: inline-block;
       font-family: var(--font-sans);
-      font-size: 13px;
-      font-weight: 500;
+      font-size: var(--btn-font-size);
+      font-weight: var(--btn-font-weight);
       letter-spacing: 0.04em;
-      padding: 12px 28px;
-      border-radius: 4px;
+      padding: var(--btn-padding);
+      border-radius: var(--btn-radius);
       text-decoration: none;
       cursor: default;
       border: none;
     }
 
     .btn--primary {
-      background: var(--green);
+      background: var(--btn-color);
       color: var(--white);
     }
 
