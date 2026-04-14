@@ -60,6 +60,53 @@
       letter-spacing: 0.02em;
       color: var(--ink);
     }
+    .app-header__spacer { flex: 1; }
+
+    /* Dark/Light mode toggle */
+    .mode-toggle {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer; user-select: none;
+    }
+    .mode-toggle__track {
+      position: relative;
+      width: 36px; height: 20px;
+      background: var(--border);
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+    .mode-toggle__track::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      background: var(--ink);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .mode-toggle__track.active { background: var(--accent); }
+    .mode-toggle__track.active::after { transform: translateX(16px); background: #000; }
+    .mode-toggle__icon {
+      width: 14px; height: 14px;
+      color: var(--ink-muted);
+      transition: color 0.2s;
+    }
+    .mode-toggle__icon.active { color: var(--accent); }
+
+    /* Light UI mode */
+    .ui-light {
+      --bg: #f0f0f0;
+      --surface: #ffffff;
+      --surface-2: #f5f5f5;
+      --border: #e0e0e0;
+      --ink: #1a1a1a;
+      --ink-muted: #666;
+      --accent: #0099cc;
+      --accent-dk: #007799;
+    }
+    .ui-light .app-header { background: #ffffff; }
+    .ui-light .pcr-app { background: #fff !important; }
+    .ui-light .pcr-app .pcr-result { background: #f5f5f5 !important; color: #1a1a1a !important; }
+    .ui-light .generate-wrap { background: linear-gradient(to top, #f0f0f0 70%, transparent); }
 
     /* Main content */
     .main {
@@ -399,7 +446,14 @@
       display: none;
     }
     .swatch-card .pickr {
-      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
     }
 
     /* ── Pickr overrides: dark theme ── */
@@ -686,6 +740,16 @@
 <header class="app-header">
   <img class="app-header__logo" src="sas-logo.svg" alt="SAS" />
   <span class="app-header__title">SAS Brand Guide Gen</span>
+  <div class="app-header__spacer"></div>
+  <div class="mode-toggle" id="modeToggle" title="Toggle dark / light mode">
+    <svg class="mode-toggle__icon active" id="iconDark" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+    </svg>
+    <div class="mode-toggle__track" id="modeTrack"></div>
+    <svg class="mode-toggle__icon" id="iconLight" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 1.78a1 1 0 011.41 0l.71.71a1 1 0 11-1.41 1.41l-.71-.7a1 1 0 010-1.42zM18 9a1 1 0 110 2h-1a1 1 0 110-2h1zM16.34 14.22a1 1 0 010 1.41l-.71.71a1 1 0 11-1.41-1.41l.7-.71a1 1 0 011.42 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-6.34-1.78a1 1 0 011.41 0l.71.71a1 1 0 01-1.41 1.41l-.71-.71a1 1 0 010-1.41zM4 9a1 1 0 110 2H3a1 1 0 110-2h1zm.64-5.22a1 1 0 011.42 0l.7.71a1 1 0 01-1.41 1.41l-.71-.7a1 1 0 010-1.42zM10 7a3 3 0 100 6 3 3 0 000-6z"/>
+    </svg>
+  </div>
 </header>
 
 <main class="main">
@@ -1221,6 +1285,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 <script>
+  // ── Dark / Light UI mode toggle ──
+  (function() {
+    const toggle = document.getElementById('modeToggle');
+    const track = document.getElementById('modeTrack');
+    const iconLight = document.getElementById('iconLight');
+    const iconDark = document.getElementById('iconDark');
+    let isLight = false;
+
+    toggle.addEventListener('click', () => {
+      isLight = !isLight;
+      document.documentElement.classList.toggle('ui-light', isLight);
+      document.body.style.background = isLight ? '#f0f0f0' : '';
+      track.classList.toggle('active', isLight);
+      iconDark.classList.toggle('active', !isLight);
+      iconLight.classList.toggle('active', isLight);
+    });
+  })();
+
   // ── State ──
   const data = {
     brandName: '',
