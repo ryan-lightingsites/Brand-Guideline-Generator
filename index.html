@@ -756,6 +756,19 @@
   <h1 class="page-title">Create your brand guide</h1>
   <p class="page-subtitle">Fill in your brand details below and generate a polished brand guide PDF.</p>
 
+  <!-- ── Template Gallery ── -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-badge" style="background:linear-gradient(135deg,var(--accent),#7e5cff);">★</div>
+      <div>
+        <div class="section-title">Start from a template</div>
+        <div class="section-subtitle">Pick a starting point — applies fonts, colors, button styles, and design system defaults. You can customize everything afterward.</div>
+      </div>
+    </div>
+
+    <div id="templateGallery" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:6px;"></div>
+  </div>
+
   <!-- ── 1. Brand Identity ── -->
   <div class="form-section">
     <div class="section-header">
@@ -1273,6 +1286,55 @@
     </div>
   </div>
 
+  <!-- ── 7. Design System Details (DESIGN.md export) ── -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-badge">7</div>
+      <div>
+        <div class="section-title">Design System Details</div>
+        <div class="section-subtitle">Used by the DESIGN.md export so AI agents can apply your system correctly. All optional — sensible defaults are used if blank.</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="dsOverview">Overview / Rationale</label>
+      <textarea id="dsOverview" class="field-input" rows="3" placeholder="e.g. Architectural minimalism meets journalistic gravitas. The UI evokes a premium matte finish — a high-end broadsheet."></textarea>
+    </div>
+
+    <label class="field-label" style="margin-top:18px;margin-bottom:10px;">Spacing Scale (px)</label>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">sm</label><input type="number" id="dsSpaceSm" class="field-input" value="8" min="0" /></div>
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">md</label><input type="number" id="dsSpaceMd" class="field-input" value="16" min="0" /></div>
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">lg</label><input type="number" id="dsSpaceLg" class="field-input" value="24" min="0" /></div>
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">xl</label><input type="number" id="dsSpaceXl" class="field-input" value="40" min="0" /></div>
+    </div>
+
+    <label class="field-label" style="margin-top:18px;margin-bottom:10px;">Rounded Scale (px)</label>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">sm</label><input type="number" id="dsRoundSm" class="field-input" value="4" min="0" /></div>
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">md</label><input type="number" id="dsRoundMd" class="field-input" value="8" min="0" /></div>
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">lg</label><input type="number" id="dsRoundLg" class="field-input" value="16" min="0" /></div>
+    </div>
+
+    <label class="field-label" style="margin-top:18px;margin-bottom:10px;">Typography Scale (rem)</label>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">h1</label><input type="number" id="dsTypeH1" class="field-input" value="3" step="0.125" min="0" /></div>
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">h2</label><input type="number" id="dsTypeH2" class="field-input" value="2.25" step="0.125" min="0" /></div>
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">body</label><input type="number" id="dsTypeBody" class="field-input" value="1" step="0.0625" min="0" /></div>
+      <div><label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">caption</label><input type="number" id="dsTypeCaption" class="field-input" value="0.75" step="0.0625" min="0" /></div>
+    </div>
+
+    <div class="field" style="margin-top:18px;">
+      <label class="field-label" for="dsDos">Do's <span style="font-weight:400;color:#888;font-size:12px;">(one per line)</span></label>
+      <textarea id="dsDos" class="field-input" rows="3" placeholder="Use the primary color for CTAs only.&#10;Maintain 24px+ gaps between elements.&#10;Use the secondary font for body copy."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="dsDonts">Don'ts <span style="font-weight:400;color:#888;font-size:12px;">(one per line)</span></label>
+      <textarea id="dsDonts" class="field-input" rows="3" placeholder="Don't mix more than two typefaces.&#10;Don't use the primary color as a small accent.&#10;Don't crowd elements with tight margins."></textarea>
+    </div>
+  </div>
+
 </main>
 
 <!-- Generate button -->
@@ -1335,7 +1397,13 @@
     images: {
       hero: null, content1: null, content2: null, content3: null,
       card1: null, card2: null, card3: null
-    }
+    },
+    overview: '',
+    spacing: { sm: 8, md: 16, lg: 24, xl: 40 },
+    rounded: { sm: 4, md: 8, lg: 16 },
+    typeScale: { h1: 3, h2: 2.25, body: 1, caption: 0.75 },
+    dos: [],
+    donts: []
   };
 
   let loadedFonts = new Set(['DM Sans']);
@@ -1854,6 +1922,28 @@
       if (data.colors[i]) data.colors[i].name = inp.value;
     });
 
+    // Design System Details (section 7)
+    data.overview = document.getElementById('dsOverview').value.trim();
+    data.spacing = {
+      sm: +document.getElementById('dsSpaceSm').value || 8,
+      md: +document.getElementById('dsSpaceMd').value || 16,
+      lg: +document.getElementById('dsSpaceLg').value || 24,
+      xl: +document.getElementById('dsSpaceXl').value || 40,
+    };
+    data.rounded = {
+      sm: +document.getElementById('dsRoundSm').value || 4,
+      md: +document.getElementById('dsRoundMd').value || 8,
+      lg: +document.getElementById('dsRoundLg').value || 16,
+    };
+    data.typeScale = {
+      h1: +document.getElementById('dsTypeH1').value || 3,
+      h2: +document.getElementById('dsTypeH2').value || 2.25,
+      body: +document.getElementById('dsTypeBody').value || 1,
+      caption: +document.getElementById('dsTypeCaption').value || 0.75,
+    };
+    data.dos = document.getElementById('dsDos').value.split('\n').map(s => s.trim()).filter(Boolean);
+    data.donts = document.getElementById('dsDonts').value.split('\n').map(s => s.trim()).filter(Boolean);
+
     return data;
   }
 
@@ -1888,8 +1978,275 @@
     }
   }
 
+  // ── Templates ──
+  const TEMPLATES = {
+    architecture: {
+      label: 'Architecture',
+      tagline: 'Editorial · Structural · Premium',
+      primaryFont: 'Playfair Display',
+      secondaryFont: 'Inter',
+      colors: [
+        { hex: '#1A1C1E', name: 'Ink',       group: 'primary', fixed: true },
+        { hex: '#B8422E', name: 'Clay',      group: 'accent',  fixed: true },
+        { hex: '#F7F5F2', name: 'Limestone', group: 'neutral', fixed: true },
+        { hex: '#6C7278', name: 'Slate',     group: 'neutral', fixed: true },
+      ],
+      borderRadius: '0',
+      separationStyle: 'border',
+      borderOpacity: 12,
+      buttonShape: 'sharp',
+      buttonSize: 'medium',
+      buttonWeight: 'bold',
+      buttonGradient: false,
+      overview: 'Architectural minimalism meets journalistic gravitas. The UI evokes a premium matte finish — a high-end broadsheet or contemporary gallery.',
+      spacing: { sm: 8, md: 16, lg: 32, xl: 64 },
+      rounded: { sm: 0, md: 0, lg: 2 },
+      typeScale: { h1: 3.5, h2: 2.5, body: 1, caption: 0.75 },
+      dos: [
+        'Reserve clay (#B8422E) for primary calls to action only.',
+        'Use generous whitespace — at least 32px gaps between elements.',
+        'Pair Playfair Display headlines with Inter body copy.'
+      ],
+      donts: [
+        "Don't use rounded corners — sharp edges only.",
+        "Don't introduce a third typeface.",
+        "Don't apply drop shadows — use 1px borders for separation."
+      ],
+      images: {
+        hero:     'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1600&q=80&auto=format&fit=crop',
+        content1: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80&auto=format&fit=crop',
+        content2: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80&auto=format&fit=crop',
+        content3: 'https://images.unsplash.com/photo-1486718448742-163732cd1544?w=1200&q=80&auto=format&fit=crop',
+        card1:    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80&auto=format&fit=crop',
+        card2:    'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800&q=80&auto=format&fit=crop',
+        card3:    'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&q=80&auto=format&fit=crop',
+      }
+    },
+    beauty: {
+      label: 'Beauty / Makeup',
+      tagline: 'Soft · Luxurious · Tactile',
+      primaryFont: 'Cormorant Garamond',
+      secondaryFont: 'Montserrat',
+      colors: [
+        { hex: '#7A3B4A', name: 'Plum',      group: 'primary', fixed: true },
+        { hex: '#D4A4A4', name: 'Rose',      group: 'accent',  fixed: true },
+        { hex: '#FBF4F0', name: 'Blush',     group: 'neutral', fixed: true },
+        { hex: '#2E1A20', name: 'Aubergine', group: 'neutral', fixed: true },
+      ],
+      borderRadius: '24',
+      separationStyle: 'shadow',
+      borderOpacity: 10,
+      buttonShape: 'pill',
+      buttonSize: 'medium',
+      buttonWeight: 'bold',
+      buttonGradient: false,
+      overview: 'A soft, luxurious palette that whispers rather than shouts. Generous curves and breathable type evoke handcrafted packaging and tactile finishes.',
+      spacing: { sm: 8, md: 20, lg: 32, xl: 56 },
+      rounded: { sm: 8, md: 16, lg: 28 },
+      typeScale: { h1: 3.25, h2: 2.25, body: 1, caption: 0.8125 },
+      dos: [
+        'Use plum (#7A3B4A) sparingly as the dominant CTA color.',
+        'Pair serif headlines with light-weight sans body copy.',
+        'Apply soft shadows to lift cards and product imagery.'
+      ],
+      donts: [
+        "Don't use harsh black — prefer aubergine for high-contrast text.",
+        "Don't use sharp corners on interactive elements.",
+        "Don't crowd content — luxury reads as space."
+      ],
+      images: {
+        hero:     'https://images.unsplash.com/photo-1522335789203-aaa2f6ae1c63?w=1600&q=80&auto=format&fit=crop',
+        content1: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1200&q=80&auto=format&fit=crop',
+        content2: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200&q=80&auto=format&fit=crop',
+        content3: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=1200&q=80&auto=format&fit=crop',
+        card1:    'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=800&q=80&auto=format&fit=crop',
+        card2:    'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=800&q=80&auto=format&fit=crop',
+        card3:    'https://images.unsplash.com/photo-1583241801-6b8e3da6c3c3?w=800&q=80&auto=format&fit=crop',
+      }
+    },
+    saas: {
+      label: 'SaaS',
+      tagline: 'Modern · Technical · Friendly',
+      primaryFont: 'Inter',
+      secondaryFont: 'Inter',
+      colors: [
+        { hex: '#4F46E5', name: 'Indigo', group: 'primary', fixed: true },
+        { hex: '#06B6D4', name: 'Cyan',   group: 'accent',  fixed: true },
+        { hex: '#F8FAFC', name: 'Cloud',  group: 'neutral', fixed: true },
+        { hex: '#0F172A', name: 'Slate',  group: 'neutral', fixed: true },
+      ],
+      borderRadius: '8',
+      separationStyle: 'shadow',
+      borderOpacity: 10,
+      buttonShape: 'rounded',
+      buttonSize: 'medium',
+      buttonWeight: 'bold',
+      buttonGradient: true,
+      buttonGradientDir: 'to bottom right',
+      overview: 'Clean, modern, and confident. Friendly geometry and a bold accent palette communicate speed, reliability, and approachability for product teams.',
+      spacing: { sm: 8, md: 16, lg: 24, xl: 48 },
+      rounded: { sm: 4, md: 8, lg: 12 },
+      typeScale: { h1: 2.75, h2: 2, body: 1, caption: 0.875 },
+      dos: [
+        'Use indigo (#4F46E5) for primary buttons and key UI affordances.',
+        'Use cyan (#06B6D4) sparingly for highlights, charts, and links.',
+        'Apply soft shadows to elevate cards and modals.'
+      ],
+      donts: [
+        "Don't use serif typefaces — sans only.",
+        "Don't apply pure black text — use slate (#0F172A) instead.",
+        "Don't use sharp edges — round all interactive elements."
+      ],
+      images: {
+        hero:     'https://images.unsplash.com/photo-1551434678-e076c223a692?w=1600&q=80&auto=format&fit=crop',
+        content1: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&q=80&auto=format&fit=crop',
+        content2: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80&auto=format&fit=crop',
+        content3: 'https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?w=1200&q=80&auto=format&fit=crop',
+        card1:    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80&auto=format&fit=crop',
+        card2:    'https://images.unsplash.com/photo-1559028012-481c04fa702d?w=800&q=80&auto=format&fit=crop',
+        card3:    'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80&auto=format&fit=crop',
+      }
+    }
+  };
+
+  function renderTemplateGallery() {
+    const wrap = document.getElementById('templateGallery');
+    if (!wrap) return;
+    wrap.innerHTML = Object.entries(TEMPLATES).map(([key, t]) => {
+      const swatches = t.colors.map(c =>
+        `<div style="flex:1;height:32px;background:${c.hex};"></div>`
+      ).join('');
+      return `
+        <div class="template-card" data-template="${key}" onclick="applyTemplate('${key}')"
+             style="background:var(--surface-2);border:2px solid var(--border);border-radius:10px;padding:0;cursor:pointer;overflow:hidden;transition:border-color 0.15s,transform 0.1s;">
+          <div style="display:flex;">${swatches}</div>
+          <div style="padding:14px 16px;">
+            <div style="font-family:'${t.primaryFont}',serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:2px;">${t.label}</div>
+            <div style="font-size:12px;color:var(--ink-muted);margin-bottom:10px;">${t.tagline}</div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span style="display:inline-block;padding:4px 10px;background:${t.colors[1].hex};color:#fff;font-size:11px;font-weight:600;border-radius:${t.buttonShape === 'pill' ? '999px' : t.buttonShape === 'sharp' ? '0' : '6px'};">Button</span>
+              <span style="font-size:11px;color:var(--ink-muted);">${t.primaryFont} · ${t.secondaryFont}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function applyTemplate(key) {
+    const t = TEMPLATES[key];
+    if (!t) return;
+
+    // Style fields only — preserve brand name, tagline, logos, images
+    data.primaryFont = t.primaryFont;
+    data.secondaryFont = t.secondaryFont;
+    data.colors = JSON.parse(JSON.stringify(t.colors));
+    data.borderRadius = t.borderRadius;
+    data.separationStyle = t.separationStyle;
+    data.borderOpacity = t.borderOpacity;
+    data.buttonShape = t.buttonShape;
+    data.buttonSize = t.buttonSize;
+    data.buttonWeight = t.buttonWeight;
+    data.buttonGradient = t.buttonGradient;
+    data.buttonGradientDir = t.buttonGradientDir || 'to right';
+    data.buttonColor = t.colors[1].hex;
+    data.buttonColor2 = t.colors[0].hex;
+    data.overview = t.overview;
+    data.spacing = { ...t.spacing };
+    data.rounded = { ...t.rounded };
+    data.typeScale = { ...t.typeScale };
+    data.dos = [...t.dos];
+    data.donts = [...t.donts];
+
+    // Fonts
+    loadFont(t.primaryFont);
+    loadFont(t.secondaryFont);
+    document.getElementById('primaryFont').value = t.primaryFont;
+    document.getElementById('secondaryFont').value = t.secondaryFont;
+    document.getElementById('primaryPreview').style.fontFamily = `'${t.primaryFont}', serif`;
+    document.getElementById('secondaryPreview').style.fontFamily = `'${t.secondaryFont}', sans-serif`;
+
+    // Swatches + button-color pickers
+    renderSwatches();
+    if (btnPickr) btnPickr.setColor(data.buttonColor, true);
+    if (window._btnPickr2) window._btnPickr2.setColor(data.buttonColor2, true);
+    if (typeof renderBtnColorSwatches === 'function') renderBtnColorSwatches();
+    if (typeof renderBtnColor2Swatches === 'function') renderBtnColor2Swatches();
+
+    // Border radius preset
+    const presets = document.querySelectorAll('.radius-preset');
+    let matched = false;
+    presets.forEach(p => {
+      const isMatch = p.dataset.value === t.borderRadius;
+      p.classList.toggle('active', isMatch);
+      if (isMatch) matched = true;
+    });
+    if (!matched) {
+      const customEl = document.querySelector('.radius-preset[data-value="custom"]');
+      if (customEl) customEl.classList.add('active');
+      document.getElementById('radiusCustomWrap').classList.add('visible');
+      document.getElementById('customRadiusInput').value = t.borderRadius;
+    } else {
+      document.getElementById('radiusCustomWrap').classList.remove('visible');
+    }
+
+    // Border opacity
+    document.getElementById('borderOpacityInput').value = t.borderOpacity;
+    document.getElementById('borderOpacityLabel').textContent = t.borderOpacity + '%';
+
+    // Toggles
+    setSeparationStyle(t.separationStyle);
+    setButtonShape(t.buttonShape);
+    setButtonSize(t.buttonSize);
+    setButtonWeight(t.buttonWeight);
+    setButtonFill(t.buttonGradient ? 'gradient' : 'solid');
+    if (t.buttonGradient && typeof setGradientDir === 'function') {
+      setGradientDir(data.buttonGradientDir);
+    }
+
+    // Design system details
+    document.getElementById('dsOverview').value = t.overview;
+    document.getElementById('dsSpaceSm').value = t.spacing.sm;
+    document.getElementById('dsSpaceMd').value = t.spacing.md;
+    document.getElementById('dsSpaceLg').value = t.spacing.lg;
+    document.getElementById('dsSpaceXl').value = t.spacing.xl;
+    document.getElementById('dsRoundSm').value = t.rounded.sm;
+    document.getElementById('dsRoundMd').value = t.rounded.md;
+    document.getElementById('dsRoundLg').value = t.rounded.lg;
+    document.getElementById('dsTypeH1').value = t.typeScale.h1;
+    document.getElementById('dsTypeH2').value = t.typeScale.h2;
+    document.getElementById('dsTypeBody').value = t.typeScale.body;
+    document.getElementById('dsTypeCaption').value = t.typeScale.caption;
+    document.getElementById('dsDos').value = t.dos.join('\n');
+    document.getElementById('dsDonts').value = t.donts.join('\n');
+
+    // Brand images — populate all 7 slots from template URLs
+    if (t.images) {
+      data.images = { ...data.images, ...t.images };
+      imageSlots.forEach(slot => {
+        const url = t.images[slot.key];
+        if (!url) return;
+        const imgEl = document.getElementById(slot.img);
+        const nameEl = document.getElementById(slot.name);
+        const prevEl = document.getElementById(slot.prev);
+        const contentEl = document.getElementById(slot.content);
+        if (imgEl) imgEl.src = url;
+        if (nameEl) nameEl.textContent = `${t.label.toLowerCase().replace(/[^a-z]+/g,'-')}-${slot.key}.jpg`;
+        if (prevEl) prevEl.classList.add('visible');
+        if (contentEl) contentEl.style.display = 'none';
+      });
+    }
+
+    // Visual feedback on cards
+    document.querySelectorAll('.template-card').forEach(c => {
+      const active = c.dataset.template === key;
+      c.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+      c.style.background = active ? 'rgba(6,204,255,0.05)' : 'var(--surface-2)';
+    });
+  }
+
   // ── Init ──
   function init() {
+    renderTemplateGallery();
     // Load saved data if exists
     try {
       const saved = localStorage.getItem('brandGuideData');
@@ -1969,6 +2326,28 @@
         if (data.buttonSize) setButtonSize(data.buttonSize);
         if (data.buttonWeight) setButtonWeight(data.buttonWeight);
         // buttonColor is restored after btnPickr is initialized below
+
+        // Restore Design System Details (section 7)
+        document.getElementById('dsOverview').value = data.overview || '';
+        if (data.spacing) {
+          document.getElementById('dsSpaceSm').value = data.spacing.sm ?? 8;
+          document.getElementById('dsSpaceMd').value = data.spacing.md ?? 16;
+          document.getElementById('dsSpaceLg').value = data.spacing.lg ?? 24;
+          document.getElementById('dsSpaceXl').value = data.spacing.xl ?? 40;
+        }
+        if (data.rounded) {
+          document.getElementById('dsRoundSm').value = data.rounded.sm ?? 4;
+          document.getElementById('dsRoundMd').value = data.rounded.md ?? 8;
+          document.getElementById('dsRoundLg').value = data.rounded.lg ?? 16;
+        }
+        if (data.typeScale) {
+          document.getElementById('dsTypeH1').value = data.typeScale.h1 ?? 3;
+          document.getElementById('dsTypeH2').value = data.typeScale.h2 ?? 2.25;
+          document.getElementById('dsTypeBody').value = data.typeScale.body ?? 1;
+          document.getElementById('dsTypeCaption').value = data.typeScale.caption ?? 0.75;
+        }
+        if (Array.isArray(data.dos)) document.getElementById('dsDos').value = data.dos.join('\n');
+        if (Array.isArray(data.donts)) document.getElementById('dsDonts').value = data.donts.join('\n');
       }
     } catch(e) {}
 

@@ -549,6 +549,15 @@
     .ds-btn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
     .ds-btn-row:last-child { margin-bottom: 0; }
     .ds-dark-panel { background: var(--brand-dark, #111); padding: 32px; border-radius: var(--brand-radius); margin-top: 8px; }
+    /* Force outline buttons in design system to render against the white tab bg
+       — bypasses --text-on-white which can resolve to low-contrast on light brand colors. */
+    .design-system .btn--outline {
+      color: var(--brand-primary, var(--ink));
+      border-color: var(--brand-primary, var(--ink));
+    }
+    .design-system .btn--ghost {
+      color: var(--ink);
+    }
 
     /* Form elements */
     .ds-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 40px; }
@@ -1613,11 +1622,70 @@
       </div>
     </div>
 
+    <!-- Design System Details (DESIGN.md export) -->
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Design System</div>
+
+      <div class="sb-field">
+        <label class="sb-label" for="sbDsOverview">Overview / Rationale</label>
+        <textarea id="sbDsOverview" class="sb-input" rows="3" placeholder="Brand rationale used in DESIGN.md…" style="resize:vertical;"></textarea>
+      </div>
+
+      <div class="sb-field">
+        <label class="sb-label">Spacing scale (px)</label>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+          <input type="number" id="sbDsSpaceSm" class="sb-input" value="8" min="0" title="sm" />
+          <input type="number" id="sbDsSpaceMd" class="sb-input" value="16" min="0" title="md" />
+          <input type="number" id="sbDsSpaceLg" class="sb-input" value="24" min="0" title="lg" />
+          <input type="number" id="sbDsSpaceXl" class="sb-input" value="40" min="0" title="xl" />
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:10px;color:var(--ui-ink-muted);margin-top:2px;text-align:center;">
+          <span>sm</span><span>md</span><span>lg</span><span>xl</span>
+        </div>
+      </div>
+
+      <div class="sb-field">
+        <label class="sb-label">Rounded scale (px)</label>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+          <input type="number" id="sbDsRoundSm" class="sb-input" value="4" min="0" title="sm" />
+          <input type="number" id="sbDsRoundMd" class="sb-input" value="8" min="0" title="md" />
+          <input type="number" id="sbDsRoundLg" class="sb-input" value="16" min="0" title="lg" />
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:10px;color:var(--ui-ink-muted);margin-top:2px;text-align:center;">
+          <span>sm</span><span>md</span><span>lg</span>
+        </div>
+      </div>
+
+      <div class="sb-field">
+        <label class="sb-label">Type scale (rem)</label>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+          <input type="number" id="sbDsTypeH1" class="sb-input" value="3" step="0.125" min="0" title="h1" />
+          <input type="number" id="sbDsTypeH2" class="sb-input" value="2.25" step="0.125" min="0" title="h2" />
+          <input type="number" id="sbDsTypeBody" class="sb-input" value="1" step="0.0625" min="0" title="body" />
+          <input type="number" id="sbDsTypeCaption" class="sb-input" value="0.75" step="0.0625" min="0" title="caption" />
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:10px;color:var(--ui-ink-muted);margin-top:2px;text-align:center;">
+          <span>h1</span><span>h2</span><span>body</span><span>caption</span>
+        </div>
+      </div>
+
+      <div class="sb-field">
+        <label class="sb-label" for="sbDsDos">Do's <span style="color:var(--ui-ink-muted);font-weight:400;">(one per line)</span></label>
+        <textarea id="sbDsDos" class="sb-input" rows="3" placeholder="Use the primary color for CTAs only." style="resize:vertical;"></textarea>
+      </div>
+
+      <div class="sb-field">
+        <label class="sb-label" for="sbDsDonts">Don'ts <span style="color:var(--ui-ink-muted);font-weight:400;">(one per line)</span></label>
+        <textarea id="sbDsDonts" class="sb-input" rows="3" placeholder="Don't mix more than two typefaces." style="resize:vertical;"></textarea>
+      </div>
+    </div>
+
   </div><!-- /sidebar-scroll -->
 
   <div class="sidebar-footer">
     <button class="export-btn" onclick="exportPDF()">Export PDF</button>
-    <button class="export-btn--secondary" onclick="exportMarkdown()">Export Markdown</button>
+    <button class="export-btn--secondary" onclick="exportMarkdown()">Export Brand Guide (.md)</button>
+    <button class="export-btn--secondary" onclick="exportDesignMd()">Export DESIGN.md</button>
   </div>
 </aside>
 
@@ -2242,7 +2310,13 @@
     buttonWeight: 'bold',
     images: { hero: null, content1: null, content2: null, content3: null, card1: null, card2: null, card3: null },
     bgOverrides: {},
-    textOverrides: {}
+    textOverrides: {},
+    overview: '',
+    spacing: { sm: 8, md: 16, lg: 24, xl: 40 },
+    rounded: { sm: 4, md: 8, lg: 16 },
+    typeScale: { h1: 3, h2: 2.25, body: 1, caption: 0.75 },
+    dos: [],
+    donts: []
   };
 
   let loadedFonts = new Set(['DM Sans', 'Playfair Display']);
@@ -2821,10 +2895,67 @@
     applyTextOverrides();
 
     initEditPanel();
+    initDesignSystemEditors();
     initBgEditing();
   }
 
   // ── Edit Panel ──
+  function initDesignSystemEditors() {
+    // Restore values
+    document.getElementById('sbDsOverview').value = state.overview || '';
+    const sp = state.spacing || {};
+    document.getElementById('sbDsSpaceSm').value = sp.sm ?? 8;
+    document.getElementById('sbDsSpaceMd').value = sp.md ?? 16;
+    document.getElementById('sbDsSpaceLg').value = sp.lg ?? 24;
+    document.getElementById('sbDsSpaceXl').value = sp.xl ?? 40;
+    const rd = state.rounded || {};
+    document.getElementById('sbDsRoundSm').value = rd.sm ?? 4;
+    document.getElementById('sbDsRoundMd').value = rd.md ?? 8;
+    document.getElementById('sbDsRoundLg').value = rd.lg ?? 16;
+    const ts = state.typeScale || {};
+    document.getElementById('sbDsTypeH1').value = ts.h1 ?? 3;
+    document.getElementById('sbDsTypeH2').value = ts.h2 ?? 2.25;
+    document.getElementById('sbDsTypeBody').value = ts.body ?? 1;
+    document.getElementById('sbDsTypeCaption').value = ts.caption ?? 0.75;
+    document.getElementById('sbDsDos').value = Array.isArray(state.dos) ? state.dos.join('\n') : '';
+    document.getElementById('sbDsDonts').value = Array.isArray(state.donts) ? state.donts.join('\n') : '';
+
+    // Wire inputs
+    document.getElementById('sbDsOverview').addEventListener('input', function() {
+      state.overview = this.value;
+      saveState();
+    });
+
+    const wireNum = (id, path, fallback) => {
+      document.getElementById(id).addEventListener('input', function() {
+        const [group, key] = path.split('.');
+        if (!state[group]) state[group] = {};
+        state[group][key] = +this.value || fallback;
+        saveState();
+      });
+    };
+    wireNum('sbDsSpaceSm', 'spacing.sm', 8);
+    wireNum('sbDsSpaceMd', 'spacing.md', 16);
+    wireNum('sbDsSpaceLg', 'spacing.lg', 24);
+    wireNum('sbDsSpaceXl', 'spacing.xl', 40);
+    wireNum('sbDsRoundSm', 'rounded.sm', 4);
+    wireNum('sbDsRoundMd', 'rounded.md', 8);
+    wireNum('sbDsRoundLg', 'rounded.lg', 16);
+    wireNum('sbDsTypeH1', 'typeScale.h1', 3);
+    wireNum('sbDsTypeH2', 'typeScale.h2', 2.25);
+    wireNum('sbDsTypeBody', 'typeScale.body', 1);
+    wireNum('sbDsTypeCaption', 'typeScale.caption', 0.75);
+
+    document.getElementById('sbDsDos').addEventListener('input', function() {
+      state.dos = this.value.split('\n').map(s => s.trim()).filter(Boolean);
+      saveState();
+    });
+    document.getElementById('sbDsDonts').addEventListener('input', function() {
+      state.donts = this.value.split('\n').map(s => s.trim()).filter(Boolean);
+      saveState();
+    });
+  }
+
   function initEditPanel() {
     // Brand name / tagline
     const sbBrandName = document.getElementById('sbBrandName');
@@ -3495,6 +3626,197 @@ Use brand colors as large background blocks — not as scattered accents or smal
     URL.revokeObjectURL(url);
   }
 
+  // ── DESIGN.md export (google-labs-code/design.md spec) ──
+  function slugifyToken(s) {
+    return String(s || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'unnamed';
+  }
+
+  function relLuminance(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if (!m) return 0;
+    const n = parseInt(m[1], 16);
+    const toLin = c => { const s = c / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); };
+    const r = toLin((n >> 16) & 0xff), g = toLin((n >> 8) & 0xff), b = toLin(n & 0xff);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  function onColorFor(hex) {
+    return relLuminance(hex) > 0.5 ? '#111111' : '#FFFFFF';
+  }
+
+  function buildDesignMd(d) {
+    const name = d.brandName || 'Brand';
+    const tagline = d.tagline || '';
+    const overview = d.overview || `${name} visual identity. Tokens below are normative; prose explains how to apply them.`;
+    const primary = d.primaryFont || 'Playfair Display';
+    const secondary = d.secondaryFont || 'DM Sans';
+    const colors = Array.isArray(d.colors) ? d.colors : [];
+    const spacing = d.spacing || { sm: 8, md: 16, lg: 24, xl: 40 };
+    const rounded = d.rounded || { sm: 4, md: 8, lg: 16 };
+    const ts = d.typeScale || { h1: 3, h2: 2.25, body: 1, caption: 0.75 };
+    const dos = Array.isArray(d.dos) ? d.dos : [];
+    const donts = Array.isArray(d.donts) ? d.donts : [];
+
+    // Build color tokens — use group as canonical name when available, else slug of name
+    const usedNames = new Set();
+    const colorTokens = colors.map((c, i) => {
+      let key = c.group && !['custom', 'neutral'].includes(c.group) ? c.group : slugifyToken(c.name || `color-${i + 1}`);
+      let base = key, n = 1;
+      while (usedNames.has(key)) { key = `${base}-${++n}`; }
+      usedNames.add(key);
+      return { key, hex: c.hex, name: c.name || key };
+    });
+
+    const primaryHex = (colorTokens.find(t => t.key === 'primary') || colorTokens[0] || { hex: '#000000' }).hex;
+    const accentHex = (colorTokens.find(t => t.key === 'accent') || colorTokens[1] || colorTokens[0] || { hex: primaryHex }).hex;
+    const buttonBgHex = d.buttonColor || accentHex;
+    const buttonBg2Hex = d.buttonColor2 || primaryHex;
+    const buttonGradient = !!d.buttonGradient;
+    const buttonGradientDir = d.buttonGradientDir || 'to right';
+    const buttonGradientCss = buttonGradient
+      ? `linear-gradient(${buttonGradientDir}, ${buttonBgHex.toUpperCase()}, ${buttonBg2Hex.toUpperCase()})`
+      : null;
+    // For gradient buttons, contrast text against the darker stop
+    const buttonTextHex = onColorFor(
+      buttonGradient
+        ? (relLuminance(buttonBgHex) < relLuminance(buttonBg2Hex) ? buttonBgHex : buttonBg2Hex)
+        : buttonBgHex
+    );
+
+    // YAML front matter
+    const yamlColors = colorTokens.map(t => `  ${t.key}: "${t.hex.toUpperCase()}"`).join('\n');
+
+    const yaml =
+`---
+version: alpha
+name: ${name}
+description: ${tagline || `${name} design system`}
+colors:
+${yamlColors}
+typography:
+  h1:
+    fontFamily: ${primary}
+    fontSize: ${ts.h1}rem
+    fontWeight: 700
+    lineHeight: 1.1
+  h2:
+    fontFamily: ${primary}
+    fontSize: ${ts.h2}rem
+    fontWeight: 600
+    lineHeight: 1.2
+  body-md:
+    fontFamily: ${secondary}
+    fontSize: ${ts.body}rem
+    fontWeight: 400
+    lineHeight: 1.5
+  label-caps:
+    fontFamily: ${secondary}
+    fontSize: ${ts.caption}rem
+    fontWeight: 500
+    letterSpacing: 0.06em
+rounded:
+  sm: ${rounded.sm}px
+  md: ${rounded.md}px
+  lg: ${rounded.lg}px
+spacing:
+  sm: ${spacing.sm}px
+  md: ${spacing.md}px
+  lg: ${spacing.lg}px
+  xl: ${spacing.xl}px
+components:
+  button-primary:
+    backgroundColor: "${buttonBgHex.toUpperCase()}"
+${buttonGradient ? `    backgroundImage: "${buttonGradientCss}"\n` : ''}    textColor: "${buttonTextHex}"
+    typography: "{typography.label-caps}"
+    rounded: "{rounded.${(d.buttonShape === 'pill' ? 'lg' : d.buttonShape === 'sharp' ? 'sm' : 'md')}}"
+    padding: ${d.buttonSize === 'large' ? '14px 28px' : d.buttonSize === 'small' ? '8px 16px' : '12px 24px'}
+  card:
+    backgroundColor: "${(colorTokens.find(t => /neutral|surface|parchment|white/i.test(t.key + ' ' + t.name)) || { hex: '#FFFFFF' }).hex.toUpperCase()}"
+    textColor: "${onColorFor((colorTokens.find(t => /neutral|surface|parchment|white/i.test(t.key + ' ' + t.name)) || { hex: '#FFFFFF' }).hex)}"
+    rounded: "{rounded.md}"
+    padding: ${spacing.lg}px
+---`;
+
+    // Markdown body (sections must follow the spec order)
+    const colorList = colorTokens.map(t =>
+      `- **${t.name} (\`${t.hex.toUpperCase()}\`)** — token \`{colors.${t.key}}\`.`
+    ).join('\n');
+
+    const dosList = dos.length
+      ? dos.map(s => `- **Do:** ${s}`).join('\n')
+      : `- **Do:** Use \`{colors.${(colorTokens.find(t => t.key === 'primary') || colorTokens[0] || { key: 'primary' }).key}}\` for dominant brand surfaces.\n- **Do:** Reserve the accent color for interactive elements only.`;
+    const dontsList = donts.length
+      ? donts.map(s => `- **Don't:** ${s}`).join('\n')
+      : `- **Don't:** Mix more than two typefaces in a single layout.\n- **Don't:** Use the primary color as a small decorative accent.`;
+
+    const sepStyle = d.separationStyle || 'border';
+    const elevationProse = sepStyle === 'shadow'
+      ? `Use drop shadows to lift cards off the page. Reserve flat borders for structural dividers only.`
+      : `Use thin 1px borders to separate surfaces. Reserve drop shadows for overlays and modals only.`;
+
+    const body =
+`
+## Overview
+
+${overview}
+
+## Colors
+
+${colorList}
+
+The palette is normative — apply these tokens directly rather than introducing new hex values.
+
+## Typography
+
+- **${primary}** is the display family — use for \`{typography.h1}\` and \`{typography.h2}\`.
+- **${secondary}** is the text family — use for \`{typography.body-md}\` and \`{typography.label-caps}\`.
+- Never introduce a third typeface.
+
+## Layout
+
+Spacing follows the \`{spacing.*}\` scale. Use \`{spacing.lg}\` (${spacing.lg}px) as the default gap between adjacent components and \`{spacing.xl}\` (${spacing.xl}px) for vertical section padding.
+
+## Elevation & Depth
+
+${elevationProse}
+
+## Shapes
+
+Corner radii follow the \`{rounded.*}\` scale. Default to \`{rounded.md}\` for cards and inputs, \`{rounded.sm}\` for tight controls, \`{rounded.lg}\` for prominent or pill-like elements.
+
+## Components
+
+- \`button-primary\` — the only button style for primary calls to action. ${buttonGradient
+  ? `Apply the gradient \`${buttonGradientCss}\` as the background — the solid \`backgroundColor\` token is a fallback for renderers that do not support gradients. On hover, shift the gradient stops ~8% darker (or reduce opacity to 0.92).`
+  : `Hover states should darken the background by ~8%.`}
+- \`card\` — the default container for grouped content. Apply ${sepStyle === 'shadow' ? 'a soft shadow' : 'a 1px border at low opacity'} for separation, never both.
+
+## Do's and Don'ts
+
+${dosList}
+${dontsList}
+`;
+
+    return yaml + body;
+  }
+
+  function exportDesignMd() {
+    const raw = localStorage.getItem('brandGuideData');
+    const d = raw ? JSON.parse(raw) : {};
+    const md = buildDesignMd(d);
+    const name = d.brandName || 'Brand';
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name.toLowerCase().replace(/\s+/g, '-')}-DESIGN.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   // ── Background override ──
   function applyBgOverrides() {
     if (!state.bgOverrides) return;
@@ -3787,16 +4109,28 @@ Use brand colors as large background blocks — not as scattered accents or smal
     if (typeEl) {
       const pf = state.primaryFont || 'Playfair Display';
       const sf = state.secondaryFont || 'DM Sans';
+      const ts = state.typeScale || {};
+      const h1 = +ts.h1 || 3;
+      const h2 = +ts.h2 || 2.25;
+      const body = +ts.body || 1;
+      const caption = +ts.caption || 0.75;
+      // Derive intermediate sizes proportionally between h2 and body, body and caption
+      const h3 = +(h2 - (h2 - body) * 0.30).toFixed(3);
+      const h4 = +(h2 - (h2 - body) * 0.55).toFixed(3);
+      const h5 = +(h2 - (h2 - body) * 0.78).toFixed(3);
+      const h6 = +(body + (h5 - body) * 0.40).toFixed(3);
+      const label = +(caption * 0.85).toFixed(3);
+      const fmt = rem => `${rem}rem`;
       const specimens = [
-        { name: 'Heading 1', font: pf, size: '48px', weight: '700', sample: 'The quick brown fox' },
-        { name: 'Heading 2', font: pf, size: '36px', weight: '600', sample: 'The quick brown fox jumps' },
-        { name: 'Heading 3', font: pf, size: '28px', weight: '600', sample: 'The quick brown fox jumps over' },
-        { name: 'Heading 4', font: pf, size: '22px', weight: '600', sample: 'The quick brown fox jumps over the lazy' },
-        { name: 'Heading 5', font: sf, size: '18px', weight: '600', sample: 'The quick brown fox jumps over the lazy dog' },
-        { name: 'Heading 6', font: sf, size: '15px', weight: '600', sample: 'The quick brown fox jumps over the lazy dog' },
-        { name: 'Body', font: sf, size: '16px', weight: '400', sample: 'The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.' },
-        { name: 'Caption', font: sf, size: '13px', weight: '400', sample: 'Supporting text and captions use a smaller size for hierarchy.' },
-        { name: 'Label', font: sf, size: '11px', weight: '500', sample: 'UPPERCASE LABELS · 0.12EM TRACKING', transform: 'uppercase', spacing: '0.12em' },
+        { name: 'Heading 1', font: pf, size: fmt(h1), weight: '700', sample: 'The quick brown fox' },
+        { name: 'Heading 2', font: pf, size: fmt(h2), weight: '600', sample: 'The quick brown fox jumps' },
+        { name: 'Heading 3', font: pf, size: fmt(h3), weight: '600', sample: 'The quick brown fox jumps over' },
+        { name: 'Heading 4', font: pf, size: fmt(h4), weight: '600', sample: 'The quick brown fox jumps over the lazy' },
+        { name: 'Heading 5', font: sf, size: fmt(h5), weight: '600', sample: 'The quick brown fox jumps over the lazy dog' },
+        { name: 'Heading 6', font: sf, size: fmt(h6), weight: '600', sample: 'The quick brown fox jumps over the lazy dog' },
+        { name: 'Body', font: sf, size: fmt(body), weight: '400', sample: 'The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.' },
+        { name: 'Caption', font: sf, size: fmt(caption), weight: '400', sample: 'Supporting text and captions use a smaller size for hierarchy.' },
+        { name: 'Label', font: sf, size: fmt(label), weight: '500', sample: 'UPPERCASE LABELS · 0.12EM TRACKING', transform: 'uppercase', spacing: '0.12em' },
       ];
       let html = '';
       specimens.forEach(s => {
