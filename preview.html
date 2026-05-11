@@ -1443,6 +1443,17 @@
           </optgroup>
         </select>
       </div>
+
+      <div class="sb-toggle-row" style="margin-top:10px;">
+        <div style="flex:1;">
+          <span class="sb-label" style="margin-bottom:2px;display:block;">Uppercase headings</span>
+          <span class="sb-label" style="font-size:10px;color:var(--ui-ink-muted);font-weight:400;text-transform:none;letter-spacing:0;margin-bottom:0;">Renders h1–h6 in UPPERCASE. Body unaffected.</span>
+        </div>
+        <label class="sb-toggle">
+          <input type="checkbox" id="sbCapitalizeHeadings" />
+          <span class="sb-toggle-track"></span>
+        </label>
+      </div>
     </div>
 
     <!-- Colors -->
@@ -1550,13 +1561,6 @@
           <span class="sb-label" style="margin-bottom:0;">Color section backgrounds</span>
           <label class="sb-toggle">
             <input type="checkbox" id="sbColoredSections" />
-            <span class="sb-toggle-track"></span>
-          </label>
-        </div>
-        <div class="sb-toggle-row">
-          <span class="sb-label" style="margin-bottom:0;">Capitalize headings</span>
-          <label class="sb-toggle">
-            <input type="checkbox" id="sbCapitalizeHeadings" />
             <span class="sb-toggle-track"></span>
           </label>
         </div>
@@ -3701,12 +3705,16 @@ typography:
     fontFamily: ${primary}
     fontSize: ${ts.h1}rem
     fontWeight: 700
-    lineHeight: 1.1
+    lineHeight: 1.1${d.capitalizeHeadings ? `
+    textTransform: uppercase
+    letterSpacing: 0.04em` : ''}
   h2:
     fontFamily: ${primary}
     fontSize: ${ts.h2}rem
     fontWeight: 600
-    lineHeight: 1.2
+    lineHeight: 1.2${d.capitalizeHeadings ? `
+    textTransform: uppercase
+    letterSpacing: 0.04em` : ''}
   body-md:
     fontFamily: ${secondary}
     fontSize: ${ts.body}rem
@@ -3773,7 +3781,8 @@ The palette is normative — apply these tokens directly rather than introducing
 
 - **${primary}** is the display family — use for \`{typography.h1}\` and \`{typography.h2}\`.
 - **${secondary}** is the text family — use for \`{typography.body-md}\` and \`{typography.label-caps}\`.
-- Never introduce a third typeface.
+- Never introduce a third typeface.${d.capitalizeHeadings ? `
+- **All headings (h1–h6) render in UPPERCASE** with \`letter-spacing: 0.04em\`. Body copy, labels, and form fields keep their natural case — never apply \`text-transform: uppercase\` outside heading elements.` : ''}
 
 ## Layout
 
