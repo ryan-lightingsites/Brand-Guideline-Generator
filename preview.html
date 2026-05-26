@@ -3460,7 +3460,11 @@
         else if (op.includes('right')) dx = c.width - dw;
         else                           dx = (c.width - dw) / 2;
         const dy = (c.height - dh) / 2;
+        // Preserve CSS filter (e.g. .logo-white inverts dark mark to white)
+        const filt = cs.filter && cs.filter !== 'none' ? cs.filter : '';
+        if (filt) ctx.filter = filt;
         ctx.drawImage(tmp, dx, dy, dw, dh);
+        if (filt) ctx.filter = 'none';
         try { resolve(c.toDataURL('image/png')); }
         catch (e) { reject(e); }
       };
