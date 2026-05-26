@@ -1688,8 +1688,6 @@
 
   <div class="sidebar-footer">
     <button class="export-btn" onclick="exportPDF()">Export PDF</button>
-    <button class="export-btn--secondary" onclick="exportMarkdown()">Export Brand Guide (.md)</button>
-    <button class="export-btn--secondary" onclick="exportDesignMd()">Export DESIGN.md</button>
   </div>
 </aside>
 
@@ -3651,6 +3649,59 @@ Use brand colors as large background blocks — not as scattered accents or smal
     return relLuminance(hex) > 0.5 ? '#111111' : '#FFFFFF';
   }
 
+  function buildLogoSection(d) {
+    const slots = [
+      { token: 'assets.logo.primary-svg', key: 'logoSvg',   label: 'Primary (SVG)',   note: 'Vector master — use for all production rendering wherever SVG is supported.' },
+      { token: 'assets.logo.primary-png', key: 'logoPng',   label: 'Primary (PNG)',   note: 'Raster fallback for environments that cannot render SVG.' },
+      { token: 'assets.logo.dark',        key: 'logoDark',  label: 'Dark variant',    note: 'Use on light surfaces.' },
+      { token: 'assets.logo.light',       key: 'logoLight', label: 'Light variant',   note: 'Use on dark surfaces.' },
+      { token: 'assets.logo.icon',        key: 'logoIcon',  label: 'Icon / monogram', note: 'Use only at small sizes (≤32px) or where the full logotype would not fit.' },
+    ];
+    const available = slots.filter(s => d[s.key]);
+    if (!available.length) return '';
+    const items = available.map(s =>
+      `### ${s.label} — token \`{${s.token}}\`\n\n![${s.label}](${d[s.key]})\n\n${s.note}\n\n**Source (data URL):** the \`src\` of the image above is the canonical asset bytes for \`{${s.token}}\`. Use it verbatim — do not substitute a placeholder, an external URL, an emoji, or a regenerated logo.\n`
+    ).join('\n');
+    const pickGuidance =
+`**How to apply (mandatory):**
+
+1. In the generated HTML/JSX, render the brand logo using the data URL embedded above — copy it directly into the \`src\` attribute (or the \`url(...)\` of a CSS background). Do NOT replace it with a text wordmark, an icon font, an external CDN URL, or a "your logo here" placeholder.
+2. Pick the variant by surface: use \`{assets.logo.light}\` on dark backgrounds, \`{assets.logo.dark}\` on light backgrounds, and \`{assets.logo.icon}\` only at ≤32px or in tight spaces. If only the primary variant is provided, use it everywhere.
+3. Prefer \`{assets.logo.primary-svg}\` over \`{assets.logo.primary-png}\` when both are present.
+4. Never recolor, restroke, rotate, crop, or stretch the logo. Maintain its native aspect ratio.
+5. Treat the logo as required content — every page header and footer of any landing page generated from this document MUST display it.
+`;
+    return `\n## Logo\n\nThe logo set below is **normative and required**. These are the actual brand bytes — embed them, do not regenerate them.\n\n${pickGuidance}\n${items}`;
+  }
+
+  function buildImagerySection(d) {
+    const slots = [
+      { token: 'assets.images.hero',     key: 'hero',     label: 'Hero',          role: 'hero',    note: 'Primary above-the-fold image — sets the brand tone.' },
+      { token: 'assets.images.content1', key: 'content1', label: 'Content 1',     role: 'content', note: 'Secondary editorial image.' },
+      { token: 'assets.images.content2', key: 'content2', label: 'Content 2',     role: 'content', note: 'Secondary editorial image.' },
+      { token: 'assets.images.content3', key: 'content3', label: 'Content 3',     role: 'content', note: 'Secondary editorial image.' },
+      { token: 'assets.images.card1',    key: 'card1',    label: 'Card 1',        role: 'card',    note: 'Card / tile imagery.' },
+      { token: 'assets.images.card2',    key: 'card2',    label: 'Card 2',        role: 'card',    note: 'Card / tile imagery.' },
+      { token: 'assets.images.card3',    key: 'card3',    label: 'Card 3',        role: 'card',    note: 'Card / tile imagery.' },
+    ];
+    const imgs = d.images || {};
+    const available = slots.filter(s => imgs[s.key]);
+    if (!available.length) return '';
+    const items = available.map(s =>
+      `### ${s.label} — token \`{${s.token}}\`\n\n![${s.label}](${imgs[s.key]})\n\n${s.note}\n\n**Source (data URL):** the \`src\` of the image above is the canonical asset bytes for \`{${s.token}}\`. Use it verbatim — do not substitute a placeholder, an external URL, or a regenerated image.\n`
+    ).join('\n');
+    const pickGuidance =
+`**How to apply (mandatory):**
+
+1. In the generated HTML/JSX, render brand imagery using the data URLs embedded above — copy each one directly into the \`src\` attribute (or the \`url(...)\` of a CSS background). Do NOT replace them with Unsplash/Picsum URLs, gray placeholders, lorem-ipsum image services, or AI-generated stand-ins.
+2. Bind images by role: place \`{assets.images.hero}\` in the hero / above-the-fold section; use \`{assets.images.content1..3}\` for editorial / feature sections in order; use \`{assets.images.card1..3}\` inside card or grid components.
+3. If a section needs an image and no slot is provided, leave the section without an image rather than inventing one.
+4. Preserve each image's intrinsic aspect ratio with \`object-fit: cover\` when filling a fixed container; never re-tint or filter unless explicitly requested.
+5. Treat these images as required content — every landing page generated from this document MUST display the hero image (if provided) above the fold.
+`;
+    return `\n## Imagery\n\nThe images below are the **canonical, required** brand image set. These are the actual brand bytes — embed them, do not swap for stock or placeholders.\n\n${pickGuidance}\n${items}`;
+  }
+
   function buildDesignMd(d) {
     const name = d.brandName || 'Brand';
     const tagline = d.tagline || '';
@@ -3689,6 +3740,28 @@ Use brand colors as large background blocks — not as scattered accents or smal
         ? (relLuminance(buttonBgHex) < relLuminance(buttonBg2Hex) ? buttonBgHex : buttonBg2Hex)
         : buttonBgHex
     );
+
+    // ── Concrete style settings from index.html (the user's actual selections) ──
+    const globalRadiusPx = parseInt(String(d.borderRadius ?? '6').replace(/[^\d.-]/g, ''), 10);
+    const safeGlobalRadius = Number.isFinite(globalRadiusPx) ? globalRadiusPx : 6;
+    const btnShape = d.buttonShape || 'rounded';
+    const btnShapeRadiusMap = { pill: '9999px', rounded: '8px', sharp: '0px' };
+    const btnRadiusPx = btnShapeRadiusMap[btnShape] || '8px';
+    const btnSize = d.buttonSize || 'medium';
+    const btnSizeMap = {
+      small:  { padding: '8px 18px',  fontSize: '12px' },
+      medium: { padding: '12px 28px', fontSize: '13px' },
+      large:  { padding: '16px 36px', fontSize: '15px' },
+    };
+    const btnPad = (btnSizeMap[btnSize] || btnSizeMap.medium).padding;
+    const btnFontSize = (btnSizeMap[btnSize] || btnSizeMap.medium).fontSize;
+    const btnWeight = d.buttonWeight || 'bold';
+    const btnFontWeight = btnWeight === 'light' ? '400' : '600';
+    const sepStyle = d.separationStyle || 'border';
+    const borderOpacityPct = d.borderOpacity != null ? d.borderOpacity : 12;
+    const cardSeparationCss = sepStyle === 'shadow'
+      ? `box-shadow: 0 8px 24px rgba(0,0,0,0.08);`
+      : `border: 1px solid rgba(0,0,0,${(borderOpacityPct / 100).toFixed(2)});`;
 
     // YAML front matter
     const yamlColors = colorTokens.map(t => `  ${t.key}: "${t.hex.toUpperCase()}"`).join('\n');
@@ -3734,18 +3807,37 @@ spacing:
   md: ${spacing.md}px
   lg: ${spacing.lg}px
   xl: ${spacing.xl}px
+shape:
+  globalBorderRadius: ${safeGlobalRadius}px
+  separationStyle: ${sepStyle}
+  borderOpacity: ${borderOpacityPct}%
+  buttonShape: ${btnShape}
+  buttonSize: ${btnSize}
+  buttonWeight: ${btnWeight}
+  buttonGradient: ${buttonGradient}
 components:
   button-primary:
     backgroundColor: "${buttonBgHex.toUpperCase()}"
 ${buttonGradient ? `    backgroundImage: "${buttonGradientCss}"\n` : ''}    textColor: "${buttonTextHex}"
-    typography: "{typography.label-caps}"
-    rounded: "{rounded.${(d.buttonShape === 'pill' ? 'lg' : d.buttonShape === 'sharp' ? 'sm' : 'md')}}"
-    padding: ${d.buttonSize === 'large' ? '14px 28px' : d.buttonSize === 'small' ? '8px 16px' : '12px 24px'}
+    fontFamily: ${secondary}
+    fontSize: ${btnFontSize}
+    fontWeight: ${btnFontWeight}
+    letterSpacing: 0.02em
+    borderRadius: ${btnRadiusPx}
+    padding: ${btnPad}
+    border: none
   card:
     backgroundColor: "${(colorTokens.find(t => /neutral|surface|parchment|white/i.test(t.key + ' ' + t.name)) || { hex: '#FFFFFF' }).hex.toUpperCase()}"
     textColor: "${onColorFor((colorTokens.find(t => /neutral|surface|parchment|white/i.test(t.key + ' ' + t.name)) || { hex: '#FFFFFF' }).hex)}"
-    rounded: "{rounded.md}"
+    borderRadius: ${safeGlobalRadius}px
     padding: ${spacing.lg}px
+    separation: ${sepStyle === 'shadow' ? 'box-shadow: 0 8px 24px rgba(0,0,0,0.08)' : `1px solid rgba(0,0,0,${(borderOpacityPct/100).toFixed(2)})`}
+  input:
+    borderRadius: ${safeGlobalRadius}px
+    border: 1px solid rgba(0,0,0,${(borderOpacityPct/100).toFixed(2)})
+    padding: 10px 14px
+    fontFamily: ${secondary}
+    fontSize: 14px
 ---`;
 
     // Markdown body (sections must follow the spec order)
@@ -3760,13 +3852,24 @@ ${buttonGradient ? `    backgroundImage: "${buttonGradientCss}"\n` : ''}    text
       ? donts.map(s => `- **Don't:** ${s}`).join('\n')
       : `- **Don't:** Mix more than two typefaces in a single layout.\n- **Don't:** Use the primary color as a small decorative accent.`;
 
-    const sepStyle = d.separationStyle || 'border';
     const elevationProse = sepStyle === 'shadow'
       ? `Use drop shadows to lift cards off the page. Reserve flat borders for structural dividers only.`
       : `Use thin 1px borders to separate surfaces. Reserve drop shadows for overlays and modals only.`;
 
     const body =
 `
+## Asset Usage (read before generating any code)
+
+This document embeds the brand's logos and images as inline data URLs in the **Logo** and **Imagery** sections below. They are not illustrative — they are the **actual production assets** for this brand.
+
+When generating a landing page, website, app, or any other artifact from this document:
+
+- **Use the embedded data URLs verbatim** as the \`src\` of \`<img>\` tags (or as \`background-image: url(...)\`). Copy the entire \`data:image/...;base64,...\` (or \`data:image/svg+xml,...\`) string into your output.
+- **Do not** replace them with placeholder services (Unsplash, Picsum, placehold.co, via.placeholder.com), text-only wordmarks, emoji, "your logo here" boxes, or AI-regenerated images.
+- **Do not** invent additional images or logos that are not in this document. If a section needs imagery and no matching slot is provided, omit the image rather than fabricating one.
+- The header/footer of any generated page MUST display the logo from the **Logo** section. The hero of any generated landing page MUST display \`{assets.images.hero}\` if it is provided.
+- Tokens like \`{assets.logo.primary-svg}\` and \`{assets.images.hero}\` resolve to the data URL of the image immediately below their heading.
+
 ## Overview
 
 ${overview}
@@ -3792,24 +3895,65 @@ Spacing follows the \`{spacing.*}\` scale. Use \`{spacing.lg}\` (${spacing.lg}px
 
 ${elevationProse}
 
-## Shapes
+## Shapes & Corners (mandatory — quote these exact values)
 
-Corner radii follow the \`{rounded.*}\` scale. Default to \`{rounded.md}\` for cards and inputs, \`{rounded.sm}\` for tight controls, \`{rounded.lg}\` for prominent or pill-like elements.
+These are the user's selections from brand setup. Use them verbatim — do not round, soften, or substitute.
 
-## Components
+- **Global border radius:** \`${safeGlobalRadius}px\`. Every card, panel, input, modal, image container, and badge MUST use \`border-radius: ${safeGlobalRadius}px\`.${safeGlobalRadius === 0 ? ` This brand uses **sharp 0px corners** — do NOT introduce any rounded corners anywhere in the UI, regardless of common practice.` : ''}
+- **Button shape:** \`${btnShape}\` → \`border-radius: ${btnRadiusPx}\`. ${btnShape === 'sharp' ? 'Buttons must have **sharp 0px corners**. Do NOT round them.' : btnShape === 'pill' ? 'Buttons must be **fully pill-shaped** (`border-radius: 9999px`). Do NOT use a partial radius.' : 'Buttons use an `8px` radius. Do NOT make them more or less rounded.'}
+- **Separation style:** \`${sepStyle}\`. ${sepStyle === 'shadow' ? `Use \`${cardSeparationCss}\` to separate surfaces. **Do NOT add borders to cards.**` : `Use \`${cardSeparationCss}\` to separate surfaces. **Do NOT add drop shadows to cards.**`}
+- Inputs, selects, and textareas use \`border-radius: ${safeGlobalRadius}px\` — match the global radius, never the button radius.
 
-- \`button-primary\` — the only button style for primary calls to action. ${buttonGradient
-  ? `Apply the gradient \`${buttonGradientCss}\` as the background — the solid \`backgroundColor\` token is a fallback for renderers that do not support gradients. On hover, shift the gradient stops ~8% darker (or reduce opacity to 0.92).`
-  : `Hover states should darken the background by ~8%.`}
-- \`card\` — the default container for grouped content. Apply ${sepStyle === 'shadow' ? 'a soft shadow' : 'a 1px border at low opacity'} for separation, never both.
+## Components (mandatory CSS — copy these values literally)
+
+### \`button-primary\` — primary call-to-action
+
+\`\`\`css
+.button-primary {
+  background: ${buttonGradient ? buttonGradientCss : buttonBgHex.toUpperCase()};
+  color: ${buttonTextHex};
+  font-family: '${secondary}', sans-serif;
+  font-size: ${btnFontSize};
+  font-weight: ${btnFontWeight};
+  letter-spacing: 0.02em;
+  border: none;
+  border-radius: ${btnRadiusPx};
+  padding: ${btnPad};
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+.button-primary:hover { filter: brightness(0.92); }
+\`\`\`
+
+${buttonGradient
+  ? `The background MUST be the gradient \`${buttonGradientCss}\` — the solid \`backgroundColor\` in YAML is only a fallback for renderers that cannot do gradients. Do NOT flatten to a solid color in the generated output.`
+  : `The background MUST be the solid color \`${buttonBgHex.toUpperCase()}\`. Do NOT introduce a gradient.`}
+
+### \`card\` — default surface for grouped content
+
+\`\`\`css
+.card {
+  background: ${(colorTokens.find(t => /neutral|surface|parchment|white/i.test(t.key + ' ' + t.name)) || { hex: '#FFFFFF' }).hex.toUpperCase()};
+  color: ${onColorFor((colorTokens.find(t => /neutral|surface|parchment|white/i.test(t.key + ' ' + t.name)) || { hex: '#FFFFFF' }).hex)};
+  border-radius: ${safeGlobalRadius}px;
+  padding: ${spacing.lg}px;
+  ${cardSeparationCss}
+}
+\`\`\`
+
+Apply ${sepStyle === 'shadow' ? 'the box-shadow above' : 'the 1px border above'} for separation — **never both**, and never the other one.
 
 ## Do's and Don'ts
 
 ${dosList}
 ${dontsList}
-`;
+${buildLogoSection(d)}${buildImagerySection(d)}`;
 
-    return yaml + body;
+    const templateAppendix = d.templateMd
+      ? `\n---\n\n## Template Reference — ${d.templateName || d.templateSlug || 'Template'}\n\nThe following guidance is inherited from the **${d.templateName || d.templateSlug}** template selected during brand setup. Treat it as normative source material — the sections above are the brand-specific overrides.\n\n${d.templateMd}\n`
+      : '';
+
+    return yaml + body + templateAppendix;
   }
 
   function exportDesignMd() {

@@ -716,6 +716,37 @@
       color: var(--ink-muted);
     }
 
+    /* Save / Load brand row */
+    .brand-io-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .brand-io-row--header {
+      margin-bottom: 0;
+      margin-right: 12px;
+    }
+    .brand-io-row--header .brand-io-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .brand-io-btn {
+      padding: 8px 14px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .brand-io-btn:hover {
+      background: var(--surface);
+      border-color: var(--accent);
+    }
+
     /* Generate button */
     .generate-wrap {
       position: fixed;
@@ -839,6 +870,11 @@
   <img class="app-header__logo" src="sas-logo.svg" alt="SAS" />
   <span class="app-header__title">SAS Brand Guide Gen</span>
   <div class="app-header__spacer"></div>
+  <div class="brand-io-row brand-io-row--header">
+    <button type="button" class="brand-io-btn" onclick="saveBrandFile()">Save Brand</button>
+    <button type="button" class="brand-io-btn" onclick="document.getElementById('loadBrandFile').click()">Load Brand</button>
+    <input type="file" id="loadBrandFile" accept="application/json,.json" style="display:none" onchange="loadBrandFile(event)">
+  </div>
   <div class="mode-toggle" id="modeToggle" title="Toggle dark / light mode">
     <svg class="mode-toggle__icon active" id="iconDark" viewBox="0 0 20 20" fill="currentColor">
       <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
@@ -1467,6 +1503,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
 <script>
   // ── Dark / Light UI mode toggle ──
   (function() {
@@ -2118,6 +2155,41 @@
     }
   }
 
+  // ── Save / Load brand to file ──
+  function saveBrandFile() {
+    const d = collectData();
+    const safeName = (d.brandName || 'brand').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'brand';
+    const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName}-brand.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function loadBrandFile(evt) {
+    const file = evt.target.files && evt.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (!parsed || typeof parsed !== 'object') throw new Error('Invalid file');
+        localStorage.setItem('brandGuideData', JSON.stringify(parsed));
+        window.location.reload();
+      } catch (err) {
+        const errEl = document.getElementById('genError');
+        if (errEl) errEl.textContent = 'Could not load brand file — not valid JSON.';
+      } finally {
+        evt.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  }
+
   // ── Templates ──
   const TEMPLATES = {
     architecture: {
@@ -2249,6 +2321,130 @@
     }
   };
 
+  // ── Runtime loader: pull templates/*.md into TEMPLATES ──
+  function _pxToNum(v) { return parseInt(String(v ?? '').replace(/[^\d.-]/g, ''), 10) || 0; }
+  function _remToNum(v) { return parseFloat(String(v ?? '').replace(/rem.*$/, '')) || 0; }
+  function _titleCase(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  function parseTemplateMd(slug, text) {
+    const m = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
+    if (!m) throw new Error('missing YAML front matter');
+    const yaml = jsyaml.load(m[1]) || {};
+    const body = m[2] || '';
+    const tpl = yaml.template || {};
+    const cols = yaml.colors || {};
+    const typ = yaml.typography || {};
+    const sp = yaml.spacing || {};
+    const rn = yaml.rounded || {};
+
+    const colors = (tpl.colorGroups || Object.keys(cols).map(k => ({ key: k, group: 'neutral', fixed: true })))
+      .map(cg => ({
+        hex: cols[cg.key] || '#000000',
+        name: _titleCase(cg.key),
+        group: cg.group || 'neutral',
+        fixed: !!cg.fixed,
+      }));
+
+    const section = (name) => {
+      const re = new RegExp('##\\s+' + name + '\\s*\\n([\\s\\S]*?)(?=\\n##\\s+|$)', 'i');
+      const sm = body.match(re);
+      return sm ? sm[1].trim() : '';
+    };
+    const overview = (section('Overview').split(/\n\s*\n/)[0] || yaml.description || '').trim();
+
+    const dd = section("Do['’]s and Don['’]ts") || section("Dos? and Don['’]?ts") || '';
+    const dos = [], donts = [];
+    dd.split('\n').forEach(line => {
+      const l = line.trim();
+      const dm = l.match(/^[-*]\s*\*\*\s*Do\s*:?\s*\*\*\s*:?\s*(.+)$/i);
+      const xm = l.match(/^[-*]\s*\*\*\s*Don['’]t\s*:?\s*\*\*\s*:?\s*(.+)$/i);
+      if (dm) dos.push(dm[1].trim());
+      else if (xm) donts.push(xm[1].trim());
+    });
+
+    const fontSize = (k) => _remToNum(typ[k] && typ[k].fontSize);
+
+    return {
+      label: yaml.name || _titleCase(slug),
+      tagline: tpl.tagline || yaml.description || '',
+      primaryFont: tpl.primaryFont || (typ.h1 && typ.h1.fontFamily) || 'Inter',
+      secondaryFont: tpl.secondaryFont || (typ['body-md'] && typ['body-md'].fontFamily) || 'Inter',
+      colors,
+      borderRadius: String(tpl.borderRadius ?? _pxToNum(rn.md) ?? 8),
+      separationStyle: tpl.separationStyle || 'border',
+      borderOpacity: tpl.borderOpacity ?? 10,
+      buttonShape: tpl.buttonShape || 'rounded',
+      buttonSize: tpl.buttonSize || 'medium',
+      buttonWeight: tpl.buttonWeight || 'bold',
+      buttonGradient: !!tpl.buttonGradient,
+      buttonGradientDir: tpl.buttonGradientDir || 'to right',
+      overview,
+      spacing: {
+        sm: _pxToNum(sp.sm) || 8,
+        md: _pxToNum(sp.md) || 16,
+        lg: _pxToNum(sp.lg) || 24,
+        xl: _pxToNum(sp.xl) || 48,
+      },
+      rounded: {
+        sm: _pxToNum(rn.sm) || 4,
+        md: _pxToNum(rn.md) || 8,
+        lg: _pxToNum(rn.lg) || 16,
+      },
+      typeScale: {
+        h1: fontSize('h1') || 3,
+        h2: fontSize('h2') || 2.25,
+        body: fontSize('body-md') || 1,
+        caption: fontSize('label-caps') || 0.75,
+      },
+      dos,
+      donts,
+      images: tpl.images || {},
+      mdBody: body.trim(),
+    };
+  }
+
+  async function discoverTemplateSlugs() {
+    // 1. Optional manifest (production-friendly; static servers without dir listing).
+    try {
+      const r = await fetch('templates/index.json', { cache: 'no-store' });
+      if (r.ok) {
+        const list = await r.json();
+        if (Array.isArray(list)) return list.filter(Boolean);
+      }
+    } catch (e) { /* fall through */ }
+    // 2. Fall back to parsing a directory listing (works with python http.server, serve, etc.).
+    try {
+      const r = await fetch('templates/', { cache: 'no-store' });
+      if (!r.ok) return [];
+      const html = await r.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      return [...doc.querySelectorAll('a[href]')]
+        .map(a => a.getAttribute('href') || '')
+        .map(h => h.split('/').pop().split('?')[0])
+        .filter(h => /\.md$/i.test(h))
+        .map(h => h.replace(/\.md$/i, ''))
+        .filter(s => s && !s.startsWith('_') && s === s.toLowerCase());
+    } catch (e) { return []; }
+  }
+
+  async function loadFileTemplates() {
+    if (typeof jsyaml === 'undefined') return;
+    const slugs = await discoverTemplateSlugs();
+    await Promise.all(slugs.map(async slug => {
+      try {
+        const r = await fetch(`templates/${slug}.md`, { cache: 'no-store' });
+        if (!r.ok) return;
+        const text = await r.text();
+        TEMPLATES[slug] = parseTemplateMd(slug, text);
+        if (TEMPLATES[slug].primaryFont) loadFont(TEMPLATES[slug].primaryFont);
+        if (TEMPLATES[slug].secondaryFont) loadFont(TEMPLATES[slug].secondaryFont);
+      } catch (e) {
+        console.warn(`[templates] failed to load ${slug}:`, e);
+      }
+    }));
+    renderTemplateGallery();
+  }
+
   function renderTemplateGallery() {
     const wrap = document.getElementById('templateGallery');
     if (!wrap) return;
@@ -2296,6 +2492,9 @@
     data.typeScale = { ...t.typeScale };
     data.dos = [...t.dos];
     data.donts = [...t.donts];
+    data.templateSlug = key;
+    data.templateName = t.label || key;
+    data.templateMd = t.mdBody || '';
 
     // Fonts
     loadFont(t.primaryFont);
@@ -2416,6 +2615,7 @@
   function init() {
     renderLogoExamples();
     renderTemplateGallery();
+    loadFileTemplates();
     updateCapsPreview();
     // Load saved data if exists
     try {
