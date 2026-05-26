@@ -690,7 +690,7 @@
     }
 
     .cover__logo-wrap { }
-    .cover__logo-wrap img { width: 200px; height: auto; }
+    .cover__logo-wrap img { width: 200px; height: 80px; object-fit: contain; object-position: left center; }
 
     .logo-placeholder {
       width: 200px;
@@ -738,7 +738,7 @@
       justify-content: center;
       padding: 32px;
     }
-    .cover__cell img { width: 110px; height: auto; }
+    .cover__cell img { width: 110px; height: 44px; object-fit: contain; }
     .logo-white { filter: brightness(0) invert(1); }
 
     .cell--dk { background: var(--brand-dark); }
@@ -768,7 +768,7 @@
       text-align: center;
     }
 
-    .mockup__inner img.logo-white { width: 280px; height: auto; }
+    .mockup__inner img.logo-white { width: 280px; height: 96px; object-fit: contain; }
 
     .mockup__logo-placeholder {
       width: 280px;
@@ -1070,7 +1070,7 @@
     }
 
     .app-card__logo-wrap { position: relative; z-index: 1; }
-    .app-card__logo-wrap img { width: 90px; height: auto; }
+    .app-card__logo-wrap img { width: 90px; height: 36px; object-fit: contain; object-position: left center; }
     .app-card__logo-placeholder {
       width: 90px;
       height: 34px;
@@ -2539,7 +2539,7 @@
     // Cover main logo (light background)
     const coverWrap = document.getElementById('coverLogoWrap');
     if (darkLogo) {
-      coverWrap.innerHTML = `<img class="logo-instance" src="${darkLogo}" style="width:200px;height:auto;" alt="Logo" />`;
+      coverWrap.innerHTML = `<img class="logo-instance" src="${darkLogo}" style="width:200px;height:80px;object-fit:contain;object-position:left center;" alt="Logo" />`;
     } else {
       coverWrap.innerHTML = `<div class="logo-placeholder"><span>${initials}</span></div>`;
     }
@@ -2559,19 +2559,19 @@
         if (iconSrc) {
           const needsFilter = !state.logoLight;
           const cls = needsFilter ? 'logo-instance logo-white' : 'logo-instance';
-          cell.el.innerHTML = `<img class="${cls}" src="${iconSrc}" style="width:60px;height:auto;" alt="Logo" />`;
+          cell.el.innerHTML = `<img class="${cls}" src="${iconSrc}" style="width:60px;height:60px;object-fit:contain;" alt="Logo" />`;
         } else if (lightLogo) {
           const cls = useLightFilter ? 'logo-instance logo-white' : 'logo-instance';
-          cell.el.innerHTML = `<img class="${cls}" src="${lightLogo}" style="width:110px;height:auto;" alt="Logo" />`;
+          cell.el.innerHTML = `<img class="${cls}" src="${lightLogo}" style="width:110px;height:44px;object-fit:contain;" alt="Logo" />`;
         } else {
           cell.el.innerHTML = `<div class="logo-placeholder logo-placeholder--sm logo-placeholder--white">${initials}</div>`;
         }
       } else {
         // light background cell — needs dark asset
         if (iconSrc) {
-          cell.el.innerHTML = `<img class="logo-instance" src="${iconSrc}" style="width:60px;height:auto;" alt="Logo" />`;
+          cell.el.innerHTML = `<img class="logo-instance" src="${iconSrc}" style="width:60px;height:60px;object-fit:contain;" alt="Logo" />`;
         } else if (darkLogo) {
-          cell.el.innerHTML = `<img class="logo-instance" src="${darkLogo}" style="width:110px;height:auto;" alt="Logo" />`;
+          cell.el.innerHTML = `<img class="logo-instance" src="${darkLogo}" style="width:110px;height:44px;object-fit:contain;" alt="Logo" />`;
         } else {
           cell.el.innerHTML = `<div class="logo-placeholder logo-placeholder--sm">${initials}</div>`;
         }
@@ -2582,7 +2582,7 @@
     const mockupInner = document.getElementById('mockupInner');
     if (lightLogo) {
       const cls = useLightFilter ? 'logo-instance logo-white' : 'logo-instance';
-      mockupInner.innerHTML = `<img class="${cls}" src="${lightLogo}" style="width:280px;height:auto;" alt="Logo" /><p class="mockup__caption">Brand in context</p>`;
+      mockupInner.innerHTML = `<img class="${cls}" src="${lightLogo}" style="width:280px;height:96px;object-fit:contain;" alt="Logo" /><p class="mockup__caption">Brand in context</p>`;
     } else {
       mockupInner.innerHTML = `<div class="mockup__logo-placeholder">${initials}</div><p class="mockup__caption">Brand in context</p>`;
     }
@@ -2731,7 +2731,7 @@
     const c3 = getColor(3);
 
     const logoHtml = iconSrc
-      ? `<img class="${iconCls}" src="${iconSrc}" style="width:60px;height:auto;" alt="Logo" />`
+      ? `<img class="${iconCls}" src="${iconSrc}" style="width:60px;height:60px;object-fit:contain;object-position:left center;" alt="Logo" />`
       : `<div class="app-card__logo-placeholder">${initials}</div>`;
 
     const tagline = state.tagline || '';
@@ -3432,6 +3432,63 @@
   }
 
   // ── Export ──
+  // html2canvas mis-renders SVG <img> elements (ignores object-fit / aspect),
+  // so we pre-rasterize them to PNG data URLs sized to the element's actual box.
+  function svgImgToPng(img, scale) {
+    return new Promise((resolve, reject) => {
+      const rect = img.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width));
+      const h = Math.max(1, Math.round(rect.height));
+      const tmp = new Image();
+      tmp.crossOrigin = 'anonymous';
+      tmp.onload = () => {
+        const c = document.createElement('canvas');
+        c.width  = w * scale;
+        c.height = h * scale;
+        const ctx = c.getContext('2d');
+        const iw = tmp.naturalWidth  || w;
+        const ih = tmp.naturalHeight || h;
+        // object-fit: contain
+        const ratio = Math.min(c.width / iw, c.height / ih);
+        const dw = iw * ratio;
+        const dh = ih * ratio;
+        // honor object-position (left | center | right) on the X axis
+        const cs = getComputedStyle(img);
+        const op = (cs.objectPosition || '').toLowerCase();
+        let dx;
+        if (op.includes('left'))       dx = 0;
+        else if (op.includes('right')) dx = c.width - dw;
+        else                           dx = (c.width - dw) / 2;
+        const dy = (c.height - dh) / 2;
+        ctx.drawImage(tmp, dx, dy, dw, dh);
+        try { resolve(c.toDataURL('image/png')); }
+        catch (e) { reject(e); }
+      };
+      tmp.onerror = reject;
+      tmp.src = img.src;
+    });
+  }
+
+  async function rasterizeSvgImages(root, scale) {
+    const imgs = Array.from(root.querySelectorAll('img'));
+    const originals = [];
+    for (const img of imgs) {
+      const src = img.getAttribute('src') || '';
+      const isSvg = src.startsWith('data:image/svg') || /\.svg(\?|$|#)/i.test(src);
+      if (!isSvg) continue;
+      try {
+        const png = await svgImgToPng(img, scale);
+        originals.push({ img, src });
+        img.setAttribute('src', png);
+      } catch (e) { /* skip on failure */ }
+    }
+    return originals;
+  }
+
+  function restoreSvgImages(originals) {
+    originals.forEach(({ img, src }) => img.setAttribute('src', src));
+  }
+
   function exportPDF() {
     const raw = localStorage.getItem('brandGuideData');
     const data = raw ? JSON.parse(raw) : {};
@@ -3477,7 +3534,18 @@
     };
 
     // Wait one rAF so the DOM is settled, then capture
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
+      // Pre-rasterize SVG <img>s so html2canvas doesn't break their sizing
+      const rasterScale = 2;
+      const rasterized = await rasterizeSvgImages(guide, rasterScale);
+
+      const finish = () => {
+        restoreSvgImages(rasterized);
+        restore();
+        btn.textContent = 'Export PDF';
+        btn.disabled = false;
+      };
+
       const contentHeight = guide.scrollHeight;
 
       const opt = {
@@ -3485,7 +3553,7 @@
         filename: `${name}-${suffix}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
-          scale: 2,
+          scale: rasterScale,
           useCORS: true,
           logging: false,
           backgroundColor: '#ffffff',
@@ -3498,15 +3566,7 @@
         pagebreak: { mode: ['css', 'avoid-all'] }
       };
 
-      html2pdf().set(opt).from(guide).save().then(() => {
-        restore();
-        btn.textContent = 'Export PDF';
-        btn.disabled = false;
-      }).catch(() => {
-        restore();
-        btn.textContent = 'Export PDF';
-        btn.disabled = false;
-      });
+      html2pdf().set(opt).from(guide).save().then(finish).catch(finish);
     });
   }
 
