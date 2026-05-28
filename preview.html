@@ -728,7 +728,7 @@
 
     .cover__grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       grid-template-rows: 1fr 1fr;
     }
 
@@ -1731,8 +1731,8 @@
     </div>
     <div class="cover__grid">
       <div class="cover__cell cell--dk" id="coverCell1" data-bg-editable="coverCell1"><!-- filled by JS --></div>
-      <div class="cover__cell cell--primary" id="coverCell2" data-bg-editable="coverCell2"><!-- filled by JS --></div>
-      <div class="cover__cell cell--secondary" id="coverCell3" data-bg-editable="coverCell3"><!-- filled by JS --></div>
+      <div class="cover__cell cell--primary" id="coverCell2" data-bg-editable="coverCell2" style="display:none"><!-- filled by JS --></div>
+      <div class="cover__cell cell--secondary" id="coverCell3" data-bg-editable="coverCell3" style="display:none"><!-- filled by JS --></div>
       <div class="cover__cell cell--white" id="coverCell4" data-bg-editable="coverCell4"><!-- filled by JS --></div>
     </div>
   </section>
@@ -1969,14 +1969,6 @@
         </div>
       </div>
 
-    </div>
-  </section>
-
-  <!-- ── 7. Brand Applications ── -->
-  <section class="applications">
-    <p class="section-label">Brand applications</p>
-    <div class="app-grid" id="appGrid">
-      <!-- filled by JS -->
     </div>
   </section>
 
@@ -3546,8 +3538,8 @@
       const finish = () => {
         restoreSvgImages(rasterized);
         restore();
-        btn.textContent = 'Export PDF';
         btn.disabled = false;
+        updateExportBtnLabel();
       };
 
       const contentHeight = guide.scrollHeight;
@@ -4261,8 +4253,18 @@ ${buildLogoSection(d)}${buildImagerySection(d)}`;
         brandGuide.style.display = (target === 'brand-guide') ? '' : 'none';
         designSystem.style.display = (target === 'design-system') ? '' : 'none';
         if (target === 'design-system') renderDesignSystem();
+        updateExportBtnLabel();
       });
     });
+    updateExportBtnLabel();
+  }
+
+  function updateExportBtnLabel() {
+    const btn = document.querySelector('.export-btn');
+    if (!btn || btn.disabled) return;
+    const active = document.querySelector('.tab-btn.active');
+    const isDS = active && active.dataset.tab === 'design-system';
+    btn.textContent = isDS ? 'Export Design System PDF' : 'Export Brand Guide PDF';
   }
 
   // ── Dark / Light UI mode toggle ──
