@@ -3497,11 +3497,14 @@
     // Determine which tab is active
     const activeTab = document.querySelector('.tab-btn.active');
     const isDS = activeTab && activeTab.dataset.tab === 'design-system';
-    const guide = isDS ? document.querySelector('.design-system') : document.querySelector('.brand-guide');
+    const tab = isDS ? document.querySelector('.design-system') : document.querySelector('.brand-guide');
     const sidebar = document.querySelector('.sidebar');
     const mainArea = document.querySelector('.main-area');
     const tabBar = document.querySelector('.tab-bar');
-    const pageWrap = guide.querySelector('.page-wrap');
+    const pageWrap = tab.querySelector('.page-wrap');
+    // html2canvas silently drops content when capturing the .design-system wrapper directly,
+    // so always capture the inner .page-wrap (which has the same children but renders cleanly).
+    const guide = pageWrap || tab;
     const suffix = isDS ? 'design-system' : 'brand-guidelines';
 
     // Snapshot original inline styles so we can restore them
